@@ -27,13 +27,16 @@ global.Java = {
 global.itemRegistry = {
   getItem: (item) => ({ getState: jest.fn(() => `item state for ${item}`) }),
 };
+
 global.events = {
   sendCommand: jest.fn(),
 };
+
 global.ZonedDateTime = {
   now: jest.fn(),
 };
-const { zoneCheck } = require('.');
+
+const { zoneCheck } = require('../zonecheck');
 
 function createFreshZone() {
   return {
@@ -68,5 +71,21 @@ describe('zonecheck', () => {
     zone.currentHumid = 50;
     zoneCheck(zone);
     expect(createTimer).not.toHaveBeenCalled();
+  });
+
+  it('does not create timers if the humidity is too high', () => {
+    const zone = createFreshZone();
+    zone.currentHumid = 91;
+    zoneCheck(zone);
+    expect(createTimer).not.toHaveBeenCalled();
+  });
+
+  it('does not create a misterTimer if there already is one', () => {
+    const zone = createFreshZone();
+    zone.currentHumid = 50;
+    zone.mistTimer = 'x';
+    zoneCheck(zone);
+    expect(createTimer).not.toHaveBeenCalled();
+
   });
 });

@@ -1,3 +1,5 @@
+var global = this;
+
 var logger = Java.type('org.slf4j.LoggerFactory').getLogger(
   'org.openhab.model.script.Rules.Experiments'
 );
@@ -139,7 +141,7 @@ function zoneCheck(zone) {
     // Check to see if cycle timer is running, if so skip this cycle.
     if (!zone.cycleTimer) {
       // See if mistTimer or fanTimer is already running, is so skip this cycle.
-      if (!zone.mistTimer && !zone.fanTimer && !zone.cycleTimer) {
+      if (!zone.mistTimer && !zone.fanTimerr) {
         logger.info('Starting Humidity Cycle.');
         if (zone.relay.getState() === 'OFF') {
           // If the Pump Switch is OFF, turn it ON
@@ -153,7 +155,7 @@ function zoneCheck(zone) {
         zone.cycleTimer = ScriptExecution.createTimer(
           ZonedDateTime.now().plusMinutes(cycleTimerLen),
           function () {
-            zone.cycleTimer = null;
+            global.zone.cycleTimer = null;
           }
         );
         // Create mist timer - run mister for two minutes, then turn on fans and start fan timer
@@ -162,13 +164,13 @@ function zoneCheck(zone) {
           function () {
             events.sendCommand(zone.relay, 'OFF');
             events.sendCommand(zone.fans, 'ON');
-            zone.mistTimer = null;
+            global.zone.mistTimer = null;
             // Create fan timer when mist timer expires - run fans for 5 minutes, then turn them off
             zone.fanTimer = ScriptExecution.createTimer(
               ZonedDateTime.now().plusMinutes(fanTimerLen),
               function () {
                 events.sendCommand(zone['fans'], 'OFF');
-                zone.fanTimer = null;
+                global.zone.fanTimer = null;
               }
             );
           }
@@ -194,5 +196,4 @@ function zoneCheck(zone) {
 
 module.exports = {
   zoneCheck,
-  zoneA,
 };
