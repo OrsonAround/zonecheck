@@ -14,6 +14,7 @@ var cycleTimeLen = 600; // TODO: Should this be a per zone setting exposed in Op
 var mistTimeLen = 150;  // One species might require more/less water -- or just rely on humidity
 var fanDelayTimeLen = 60;
 var fanTimeLen = 150;
+var coolFansTimeLen = 60;
 
 (function (global) {
   global.zoneA = global.zoneA || {
@@ -96,7 +97,7 @@ pumpCheck();
 
 function zoneCheck(zone) {
   // Make sure SHT10 array & Relays are actually online -- zigbee switches too?
-  // TODO Test that MQTT's LWT is actually working FOR BOTH DEVICES and ALL CHANNELS
+  // TODO Test that MQTT's LWT is actually working FOR BOTH DEVICES and QOS is = 2 for ALL CHANNELS
   var sht10Status = Things.getThingStatusInfo('mqtt:topic:49a597ce3e:1cc6ab4e6e');
   if( sht10Status == 'OFFLINE') {
     logger.info("SHT10 Array is OFFLINE");
@@ -138,6 +139,15 @@ function zoneCheck(zone) {
     );
   } else if (zone.currentTemp > zone.desiredTemp) {
     logger.info('Temperature too high.');
+    // Turn on fans then turn off using a different fan timer
+    //events.sendCommand(zone.fans, OnOffType.ON);
+    //zone.coolFansTimer = ScriptExecution.createTimer(
+    //  ZonedDateTime.now().plusSeconds(coolFansTimeLen),
+    //  function() { 
+    //    zone.coolFansTimer = null;
+    //    events.sendCommand(zone.fans, OnOffType.OFF);
+    //  }
+    //);
   } else {
     logger.info('Temperature in range.');
   }
@@ -145,7 +155,12 @@ function zoneCheck(zone) {
   if (zone.currentHumid < zone.desiredHumid) {
     if (!zone.cycleTimer && !zone.mistTimer && !zone.delayFanTimer &&!zone.fanTimer) {
       logger.info('Starting Humidity Cycle.');
-     // If the Pump Switch is OFF, turn it ON
+      // If fans are running for cooling, stop them and cancel that timer
+      if (zone.coolFansTimer) {
+        zone.coolFansTimer = null; // Does this actually kill the timer?
+        events.sendCommand(zone.fans, OnOffType.OFF);
+      }
+      // If the Pump Switch is OFF, turn it ON
       if (pumpSwitch.getState() === OnOffType.OFF) {
         logger.info("Turning on pump switch.");
         events.sendCommand(pumpSwitch, OnOffType.ON);
