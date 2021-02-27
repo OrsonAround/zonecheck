@@ -1,4 +1,7 @@
-const createTimer = jest.fn(() => 'timer');
+const createTimer = jest.fn((timeout, callback) => ({
+  timeout,
+  callback,
+}));
 const logger = jest.fn();
 
 let pumpSwitchState = 'OFF';
@@ -10,7 +13,7 @@ global.Java = {
       case 'java.time.ZonedDateTime':
         return {
           now: () => ({
-            plusMinutes: jest.fn(),
+            plusMinutes: jest.fn((x) => x),
           }),
         };
         break;
@@ -49,10 +52,6 @@ global.events = {
   sendCommand: jest.fn(),
 };
 
-global.ZonedDateTime = {
-  now: jest.fn(),
-};
-
 const { zoneCheck } = require('../zonecheck');
 
 function createFreshZone() {
@@ -80,6 +79,7 @@ describe('zonecheck', () => {
     expect(zone.cycleTimer).not.toBeDefined();
     zoneCheck(zone);
     expect(zone.cycleTimer).toBeDefined();
+    expect(zone.cycleTimer).not.toBeNull();
   });
 
   it('does not create timers if one is there', () => {
@@ -131,5 +131,24 @@ describe('zonecheck', () => {
     expect(logger).toHaveBeenCalledWith(
       expect.stringMatching('Humidtiy in range')
     );
+  });
+
+  it('deletes the timer afterwards', () => {
+    const zone = createFreshZone();
+    zone.currentHumid = 50;
+    zoneCheck(zone);
+    zone.cycleTimer.callback();
+    expect(zone.cycleTimer).toBeNull();
+  });
+
+  it('recreates the timer after they have all timed out', () => {
+    const zone = createFreshZone();
+    zone.currentHumid = 50;
+    zoneCheck(zone);
+    zone.cycleTimer.callback();
+    zone.mistTimer.callback();
+    zone.fanTimer.callback();
+    zoneCheck(zone);
+    expect(zone.cycleTimer).not.toBeNull();
   });
 });

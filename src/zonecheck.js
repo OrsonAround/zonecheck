@@ -14,12 +14,6 @@ var mistTimerLen = 2;
 var fanTimerLen = 5;
 
 (function (global) {
-  if (!global.zoneA) {
-    console.log('zone a does not exist, creating new');
-  } else {
-    console.log('zone a already exists');
-  }
-
   global.zoneA = global.zoneA || {
     zoneName: 'A',
     desiredTemp: 75, // Need to get this from openhab item in the future
@@ -164,7 +158,7 @@ function zoneCheck(zone) {
         zone.cycleTimer = ScriptExecution.createTimer(
           ZonedDateTime.now().plusMinutes(cycleTimerLen),
           function () {
-            global.zone.cycleTimer = null;
+            zone.cycleTimer = null;
           }
         );
         // Create mist timer - run mister for two minutes, then turn on fans and start fan timer
@@ -173,13 +167,13 @@ function zoneCheck(zone) {
           function () {
             events.sendCommand(zone.relay, 'OFF');
             events.sendCommand(zone.fans, 'ON');
-            global.zone.mistTimer = null;
+            zone.mistTimer = null;
             // Create fan timer when mist timer expires - run fans for 5 minutes, then turn them off
             zone.fanTimer = ScriptExecution.createTimer(
               ZonedDateTime.now().plusMinutes(fanTimerLen),
               function () {
                 events.sendCommand(zone['fans'], 'OFF');
-                global.zone.fanTimer = null;
+                zone.fanTimer = null;
               }
             );
           }
