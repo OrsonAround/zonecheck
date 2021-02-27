@@ -72,25 +72,25 @@ var fanTimerLen = 5;
 
   // Run zoneCheck() for enabled zones
   var enabledA =
-    itemRegistry.getItem('ClimateSHT10Array_ZoneA').getState() === 'ON';
+    itemRegistry.getItem('ClimateSHT10Array_ZoneA').getState() === OnOffType.ON;
   if (enabledA) {
     zoneCheck(global.zoneA);
   }
 
   var enabledB =
-    itemRegistry.getItem('ClimateSHT10Array_ZoneB').getState() === 'ON';
+    itemRegistry.getItem('ClimateSHT10Array_ZoneB').getState() === OnOffType.ON;
   if (enabledB) {
     zoneCheck(global.zoneB);
   }
 
   var enabledC =
-    itemRegistry.getItem('ClimateSHT10Array_ZoneC').getState() === 'ON';
+    itemRegistry.getItem('ClimateSHT10Array_ZoneC').getState() === OnOffType.ON;
   if (enabledC) {
     zoneCheck(global.zoneC);
   }
 
   var enabledD =
-    itemRegistry.getItem('ClimateSHT10Array_ZoneD').getState() === 'ON';
+    itemRegistry.getItem('ClimateSHT10Array_ZoneD').getState() === OnOffType.ON;
   if (enabledD) {
     zoneCheck(global.zoneD);
   }
@@ -99,11 +99,11 @@ var fanTimerLen = 5;
   // TODO: Make sure QOS is 2 on all these MQTT topics
   var pumpSwitch = itemRegistry.getItem('Water_Pump_Switch');
   if (
-    pumpSwitch.getState() === 'ON' &&
-    global.zoneA.relay === 'OFF' &&
-    global.zoneB.relay === 'OFF' &&
-    global.zoneC.relay === 'OFF' &&
-    global.zoneD.relay === 'OFF'
+    pumpSwitch.getState() === OnOffType.ON &&
+    global.zoneA.relay === OnOffType.OFF &&
+    global.zoneB.relay === OnOffType.OFF &&
+    global.zoneC.relay === OnOffType.OFF &&
+    global.zoneD.relay === OnOffType.OFF
   ) {
     events.sendCommand(pumpSwitch, 'OFF');
   }
@@ -145,10 +145,10 @@ function zoneCheck(zone) {
       // See if mistTimer or fanTimer is already running, is so skip this cycle.
       if (!zone.mistTimer && !zone.fanTimer) {
         logger.info('Starting Humidity Cycle.');
-        if (zone.relay.getState() === 'OFF') {
+        if (zone.relay.getState() === OnOffType.OFF) {
           // If the Pump Switch is OFF, turn it ON
           var pumpSwitch = itemRegistry.getItem('Water_Pump_Switch');
-          if (pumpSwitch.getState() === 'OFF') {
+          if (pumpSwitch.getState() === OnOffType.OFF) {
             events.sendCommand(pumpSwitch, 'ON');
           }
           events.sendCommand(zone.relay, 'ON');
@@ -172,7 +172,7 @@ function zoneCheck(zone) {
             zone.fanTimer = ScriptExecution.createTimer(
               ZonedDateTime.now().plusMinutes(fanTimerLen),
               function () {
-                events.sendCommand(zone['fans'], 'OFF');
+                events.sendCommand(zone.fans, 'OFF');
                 zone.fanTimer = null;
               }
             );
@@ -189,7 +189,7 @@ function zoneCheck(zone) {
       );
     }
   } else if (zone.currentHumid > zone.desiredHumid) {
-    if (zone.relay.getState() === 'ON') {
+    if (zone.relay.getState() === OnOffType.ON) {
       events.sendCommand(zone.relay, 'OFF');
     }
   } else {
