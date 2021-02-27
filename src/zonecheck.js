@@ -8,66 +8,34 @@ var ScriptExecution = Java.type(
 );
 var ZonedDateTime = Java.type('java.time.ZonedDateTime');
 
-// Timer Lengths - minutes
-var cycleTimerLen = 60;
-var mistTimerLen = 2;
-var fanTimerLen = 5;
+// Timer Lengths 
+var cycleTimerLen = 2;
+var mistTimerLen = 1;
+var fanTimerLen = 1;
 
 (function (global) {
   global.zoneA = global.zoneA || {
     zoneName: 'A',
     desiredTemp: 75, // Need to get this from openhab item in the future
     desiredHumid: 90,
-    currentTemp: itemRegistry
-      .getItem('ClimateSHT10Array_TemperatureZoneA')
-      .getState(),
-    currentHumid: itemRegistry
-      .getItem('ClimateSHT10Array_HumidityZoneA')
-      .getState(),
-    relay: itemRegistry.getItem('ClimateController_Relay1'),
-    fans: itemRegistry.getItem('ZoneAFans_Switch'),
   };
 
   global.zoneB = global.zoneB || {
     zoneName: 'B',
     desiredTemp: 75,
     desiredHumid: 90,
-    currentTemp: itemRegistry
-      .getItem('ClimateSHT10Array_TemperatureZoneB')
-      .getState(),
-    currentHumid: itemRegistry
-      .getItem('ClimateSHT10Array_HumidityZoneB')
-      .getState(),
-    relay: itemRegistry.getItem('ClimateController_Relay2'),
-    fans: itemRegistry.getItem('ZoneBFans_Switch'),
   };
 
   global.zoneC = global.zoneC || {
     zoneName: 'C',
     desiredTemp: 75,
     desiredHumid: 90,
-    currentTemp: itemRegistry
-      .getItem('ClimateSHT10Array_TemperatureZoneC')
-      .getState(),
-    currentHumid: itemRegistry
-      .getItem('ClimateSHT10Array_HumidityZoneC')
-      .getState(),
-    relay: itemRegistry.getItem('ClimateController_Relay9'),
-    fans: itemRegistry.getItem('ZoneCFans_Switch'),
   };
 
   global.zoneD = global.zoneD || {
     zoneName: 'D',
     desiredTemp: 75,
     desiredHumid: 90,
-    currentTemp: itemRegistry
-      .getItem('ClimateSHT10Array_TemperatureZoneD')
-      .getState(),
-    currentHumid: itemRegistry
-      .getItem('ClimateSHT10Array_HumidityZoneD')
-      .getState(),
-    relay: itemRegistry.getItem('ClimateController_Relay10'),
-    fans: itemRegistry.getItem('ZoneDFans_Switch'),
   };
 
   // Run zoneCheck() for enabled zones
@@ -95,21 +63,24 @@ var fanTimerLen = 5;
     zoneCheck(global.zoneD);
   }
 
-  // Check state of relays, if none are ON turn OFF pump
-  // TODO: Make sure QOS is 2 on all these MQTT topics
-  var pumpSwitch = itemRegistry.getItem('Water_Pump_Switch');
-  if (
-    pumpSwitch.getState() === OnOffType.ON &&
-    global.zoneA.relay === OnOffType.OFF &&
-    global.zoneB.relay === OnOffType.OFF &&
-    global.zoneC.relay === OnOffType.OFF &&
-    global.zoneD.relay === OnOffType.OFF
-  ) {
-    events.sendCommand(pumpSwitch, 'OFF');
-  }
 })(this);
 
 function zoneCheck(zone) {
+  
+  zone.currentTemp = itemRegistry.getItem('ClimateSHT10Array_TemperatureZone' + zone.zoneName).getState();
+  zone.currentHumid = itemRegistry.getItem('ClimateSHT10Array_HumidityZone' + zone.zoneName).getState();
+  if(zone.zoneName === 'A') {
+    zone.relay = itemRegistry.getItem('ClimateController_Relay1');
+  } else if (zone.zoneName === 'B') {
+    zone.relay = itemRegistry.getItem('ClimateController_Relay2');
+  } else if (zone.zoneName === 'C') {
+    zone.relay = itemRegistry.getItem('ClimateController_Relay9');
+  } else if (zone.zoneName === 'D') {
+    zone.relay = itemRegistry.getItem('ClimateController_Relay10');
+  }
+  zone.fans = itemRegistry.getItem('Zone' + zone.zoneName + 'Fans_Switch');
+  
+    
   logger.info('* * * Zone ' + zone.zoneName + ' * * *');
   logger.info(
     'Current Temperature: ' +
@@ -167,6 +138,13 @@ function zoneCheck(zone) {
           function () {
             events.sendCommand(zone.relay, 'OFF');
             events.sendCommand(zone.fans, 'ON');
+            // See if any other relays are ON if not shut offer pump
+            if(itemRegistry.getItem('ClimateController_Relay1').getState() === OnOffType.OFF &&
+               itemRegistry.getItem('ClimateController_Relay2').getState() === OnOffType.OFF &&
+               itemRegistry.getItem('ClimateController_Relay9').getState() === OnOffType.OFF &&
+               itemRegistry.getItem('ClimateController_Relay10').getState() === OnOffType.OFF) {
+              events.SendCommand(itemRegistry.getItem('Water_Pump_Switch'), OnOffType.OFF);
+            }
             zone.mistTimer = null;
             // Create fan timer when mist timer expires - run fans for 5 minutes, then turn them off
             zone.fanTimer = ScriptExecution.createTimer(
@@ -196,7 +174,3 @@ function zoneCheck(zone) {
     logger.info('Humidtiy in range.');
   }
 }
-
-module.exports = {
-  zoneCheck,
-};
