@@ -8,10 +8,10 @@ var ScriptExecution = Java.type(
 );
 var ZonedDateTime = Java.type('java.time.ZonedDateTime');
 
-// Timer Lengths 
-var cycleTimerLen = 2;
-var mistTimerLen = 1;
-var fanTimerLen = 1;
+// Timer Lengths - seconds
+var cycleTimerLen = 600;
+var mistTimerLen = 150;
+var fanTimerLen = 150;
 
 (function (global) {
   global.zoneA = global.zoneA || {
@@ -65,6 +65,22 @@ var fanTimerLen = 1;
 
 })(this);
 
+
+function pumpCheck() {
+  var pumpSwitch = itemRegistry.getItem('Water_Pump_Switch');
+  if(pumpSwitch.getState() === OnOffType.ON &&
+    itemRegistry.getItem('ClimateController_Relay1').getState() === OnOffType.OFF &&
+    itemRegistry.getItem('ClimateController_Relay2').getState() === OnOffType.OFF &&
+    itemRegistry.getItem('ClimateController_Relay9').getState() === OnOffType.OFF &&
+    itemRegistry.getItem('ClimateController_Relay10').getState() === OnOffType.OFF) {
+      events.sendCommand(pumpSwitch, OnOffType.OFF);
+      logger.info("Turning off Water Pump.");
+  }
+}
+
+// Doesn't fire reliably at the end of mistTimer so run it everytime. 
+pumpCheck();
+
 function zoneCheck(zone) {
   
   zone.currentTemp = itemRegistry.getItem('ClimateSHT10Array_TemperatureZone' + zone.zoneName).getState();
@@ -80,6 +96,7 @@ function zoneCheck(zone) {
   }
   zone.fans = itemRegistry.getItem('Zone' + zone.zoneName + 'Fans_Switch');
   
+  var pumpSwitch = itemRegistry.getItem('Water_Pump_Switch');
     
   logger.info('* * * Zone ' + zone.zoneName + ' * * *');
   logger.info(
@@ -110,61 +127,51 @@ function zoneCheck(zone) {
 
   // Humidity
   if (zone.currentHumid < zone.desiredHumid) {
-    logger.info('Humidity too low.');
-    // Check to see if cycle timer is running, if so skip this cycle.
-    if (!zone.cycleTimer) {
-      // See if mistTimer or fanTimer is already running, is so skip this cycle.
-      if (!zone.mistTimer && !zone.fanTimer) {
-        logger.info('Starting Humidity Cycle.');
-        if (zone.relay.getState() === OnOffType.OFF) {
-          // If the Pump Switch is OFF, turn it ON
-          var pumpSwitch = itemRegistry.getItem('Water_Pump_Switch');
-          if (pumpSwitch.getState() === OnOffType.OFF) {
-            events.sendCommand(pumpSwitch, 'ON');
-          }
-          events.sendCommand(zone.relay, 'ON');
-          logger.info('turning on');
-        }
-        // Create cycle timer to prevent running humidity cycle more than once per hour
-        zone.cycleTimer = ScriptExecution.createTimer(
-          ZonedDateTime.now().plusMinutes(cycleTimerLen),
-          function () {
-            zone.cycleTimer = null;
-          }
-        );
-        // Create mist timer - run mister for two minutes, then turn on fans and start fan timer
-        zone.mistTimer = ScriptExecution.createTimer(
-          ZonedDateTime.now().plusMinutes(mistTimerLen),
-          function () {
-            events.sendCommand(zone.relay, 'OFF');
-            events.sendCommand(zone.fans, 'ON');
-            // See if any other relays are ON if not shut offer pump
-            if(itemRegistry.getItem('ClimateController_Relay1').getState() === OnOffType.OFF &&
-               itemRegistry.getItem('ClimateController_Relay2').getState() === OnOffType.OFF &&
-               itemRegistry.getItem('ClimateController_Relay9').getState() === OnOffType.OFF &&
-               itemRegistry.getItem('ClimateController_Relay10').getState() === OnOffType.OFF) {
-              events.SendCommand(itemRegistry.getItem('Water_Pump_Switch'), OnOffType.OFF);
-            }
-            zone.mistTimer = null;
-            // Create fan timer when mist timer expires - run fans for 5 minutes, then turn them off
-            zone.fanTimer = ScriptExecution.createTimer(
-              ZonedDateTime.now().plusMinutes(fanTimerLen),
-              function () {
-                events.sendCommand(zone.fans, 'OFF');
-                zone.fanTimer = null;
-              }
-            );
-          }
-        );
+    if (!zone.cycleTimer && !zone.mistTimer && !zone.fanTimer) {
+      logger.info('Starting Humidity Cycle.');
+     // If the Pump Switch is OFF, turn it ON
+      if (pumpSwitch.getState() === OnOffType.OFF) {
+        logger.info("Turning on pump switch");
+        events.sendCommand(pumpSwitch, 'ON');
       } else {
-        logger.info('Humidity cycle is already running.');
-      }
-    } else {
-      logger.info(
-        'Humidity cycle has already ran in the past ' +
-          cycleTimerLen +
-          ' minutes.'
+        logger.info("Pump switch already on");
+      }      
+      if (zone.relay.getState() === OnOffType.OFF) {
+       
+        events.sendCommand(zone.relay, 'ON');
+        logger.info('Turning on Relay.');
+      }      
+      // Create cycle timer to prevent running humidity cycle more than once in a specified time period
+      zone.cycleTimer = ScriptExecution.createTimer(
+        ZonedDateTime.now().plusSeconds(cycleTimerLen),
+        function () {
+          zone.cycleTimer = null;
+          logger.info("Humidity cycle has ended for Zone " + zone.zoneName);
+        }
       );
+      // Create mist timer - run mister, then turn on fans and start fanTimer
+      zone.mistTimer = ScriptExecution.createTimer(
+        ZonedDateTime.now().plusSeconds(mistTimerLen),
+        function () {
+          logger.info("Mist cycle has ended for Zone" + zone.zoneName + ". Turning on fans.");
+          events.sendCommand(zone.relay, 'OFF');
+          events.sendCommand(zone.fans, 'ON');
+          // See if any other relays are ON if not shut OFF pump
+          pumpCheck();
+          zone.mistTimer = null;
+          // Create fan timer when mist timer expires - run fans for 5 minutes, then turn them off
+          zone.fanTimer = ScriptExecution.createTimer(
+            ZonedDateTime.now().plusSeconds(fanTimerLen),
+            function () {
+              logger.info("Fan cycle has ended for Zone " + zone.zoneName);
+              events.sendCommand(zone.fans, 'OFF');
+              zone.fanTimer = null;
+            }
+          );
+        }
+      );
+    } else {
+      logger.info('Low Humidity, but cycle is already running or has ran in the past ' + cycleTimerLen + ' seconds');
     }
   } else if (zone.currentHumid > zone.desiredHumid) {
     if (zone.relay.getState() === OnOffType.ON) {
@@ -173,4 +180,3 @@ function zoneCheck(zone) {
   } else {
     logger.info('Humidtiy in range.');
   }
-}
