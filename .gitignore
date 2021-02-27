@@ -1,0 +1,16 @@
+.idea
+.DS_STORE
+.eslintcache
+*.swp
+node_modules/
+.env*
+dist/
+coverage/
+Session.vim
+__snapshots__/
+/webpack.suhrthing.js
+.stylelintcache
+*.scss.d.ts
+wip.txt
+/stats.json
+tmp.js
