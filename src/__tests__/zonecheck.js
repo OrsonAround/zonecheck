@@ -1,4 +1,8 @@
 const createTimer = jest.fn(() => 'timer');
+const logger = jest.fn();
+
+let pumpSwitchState = 'OFF';
+const PUMP_SWITCH_NAME = 'Water_Pump_Switch';
 
 global.Java = {
   type: (x) => {
@@ -18,14 +22,27 @@ global.Java = {
       default:
         return {
           getLogger: () => ({
-            info: jest.fn(), // console.log,
+            info: logger,
           }),
         };
     }
   },
 };
+
 global.itemRegistry = {
-  getItem: (item) => ({ getState: jest.fn(() => `item state for ${item}`) }),
+  getItem: (item) => ({
+    name: item,
+    getState: () => {
+      switch (item) {
+        case PUMP_SWITCH_NAME:
+          return pumpSwitchState;
+          break;
+        default:
+          return `getItem ${item} getState`;
+          break;
+      }
+    },
+  }),
 };
 
 global.events = {
@@ -47,7 +64,7 @@ function createFreshZone() {
       .getItem('ClimateSHT10Array_TemperatureZoneD')
       .getState(),
     currentHumid: jest.fn(),
-    relay: { getState: jest.fn(() => 'OFF') },
+    relay: { getState: jest.fn(() => 'OFF'), name: 'relay' },
     fans: itemRegistry.getItem('ZoneDFans_Switch'),
   };
 }
@@ -86,6 +103,33 @@ describe('zonecheck', () => {
     zone.mistTimer = 'x';
     zoneCheck(zone);
     expect(createTimer).not.toHaveBeenCalled();
+  });
 
+  it('turns on the pump if its off when creating a mister', () => {
+    const zone = createFreshZone();
+    pumpSwitchState = 'OFF';
+    zone.currentHumid = 50;
+    zoneCheck(zone);
+    expect(global.events.sendCommand).toHaveBeenCalledWith(
+      expect.objectContaining({ name: PUMP_SWITCH_NAME }),
+      'ON'
+    );
+  });
+
+  it('shuts it off when its over humidity', () => {
+    const zone = createFreshZone();
+    zone.relay.getState = jest.fn(() => 'ON');
+    zone.currentHumid = 91;
+    zoneCheck(zone);
+    expect(global.events.sendCommand).toHaveBeenCalledWith(zone.relay, 'OFF');
+  });
+
+  it('logs when in range', () => {
+    const zone = createFreshZone();
+    zone.currentHumid = 90;
+    zoneCheck(zone);
+    expect(logger).toHaveBeenCalledWith(
+      expect.stringMatching('Humidtiy in range')
+    );
   });
 });

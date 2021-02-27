@@ -1,4 +1,4 @@
-var global = this;
+'use strict';
 
 var logger = Java.type('org.slf4j.LoggerFactory').getLogger(
   'org.openhab.model.script.Rules.Experiments'
@@ -13,99 +13,107 @@ var cycleTimerLen = 60;
 var mistTimerLen = 2;
 var fanTimerLen = 5;
 
-global.zoneA = global.zoneA || {
-  zoneName: 'A',
-  desiredTemp: 75, // Need to get this from openhab item in the future
-  desiredHumid: 90,
-  currentTemp: itemRegistry
-    .getItem('ClimateSHT10Array_TemperatureZoneA')
-    .getState(),
-  currentHumid: itemRegistry
-    .getItem('ClimateSHT10Array_HumidityZoneA')
-    .getState(),
-  relay: itemRegistry.getItem('ClimateController_Relay1'),
-  fans: itemRegistry.getItem('ZoneAFans_Switch'),
-};
+(function (global) {
+  if (!global.zoneA) {
+    console.log('zone a does not exist, creating new');
+  } else {
+    console.log('zone a already exists');
+  }
 
-global.zoneB = global.zoneB || {
-  zoneName: 'B',
-  desiredTemp: 75,
-  desiredHumid: 90,
-  currentTemp: itemRegistry
-    .getItem('ClimateSHT10Array_TemperatureZoneB')
-    .getState(),
-  currentHumid: itemRegistry
-    .getItem('ClimateSHT10Array_HumidityZoneB')
-    .getState(),
-  relay: itemRegistry.getItem('ClimateController_Relay2'),
-  fans: itemRegistry.getItem('ZoneBFans_Switch'),
-};
+  global.zoneA = global.zoneA || {
+    zoneName: 'A',
+    desiredTemp: 75, // Need to get this from openhab item in the future
+    desiredHumid: 90,
+    currentTemp: itemRegistry
+      .getItem('ClimateSHT10Array_TemperatureZoneA')
+      .getState(),
+    currentHumid: itemRegistry
+      .getItem('ClimateSHT10Array_HumidityZoneA')
+      .getState(),
+    relay: itemRegistry.getItem('ClimateController_Relay1'),
+    fans: itemRegistry.getItem('ZoneAFans_Switch'),
+  };
 
-global.zoneC = global.zoneC || {
-  zoneName: 'C',
-  desiredTemp: 75,
-  desiredHumid: 90,
-  currentTemp: itemRegistry
-    .getItem('ClimateSHT10Array_TemperatureZoneC')
-    .getState(),
-  currentHumid: itemRegistry
-    .getItem('ClimateSHT10Array_HumidityZoneC')
-    .getState(),
-  relay: itemRegistry.getItem('ClimateController_Relay9'),
-  fans: itemRegistry.getItem('ZoneCFans_Switch'),
-};
+  global.zoneB = global.zoneB || {
+    zoneName: 'B',
+    desiredTemp: 75,
+    desiredHumid: 90,
+    currentTemp: itemRegistry
+      .getItem('ClimateSHT10Array_TemperatureZoneB')
+      .getState(),
+    currentHumid: itemRegistry
+      .getItem('ClimateSHT10Array_HumidityZoneB')
+      .getState(),
+    relay: itemRegistry.getItem('ClimateController_Relay2'),
+    fans: itemRegistry.getItem('ZoneBFans_Switch'),
+  };
 
-global.zoneD = global.zoneD || {
-  zoneName: 'D',
-  desiredTemp: 75,
-  desiredHumid: 90,
-  currentTemp: itemRegistry
-    .getItem('ClimateSHT10Array_TemperatureZoneD')
-    .getState(),
-  currentHumid: itemRegistry
-    .getItem('ClimateSHT10Array_HumidityZoneD')
-    .getState(),
-  relay: itemRegistry.getItem('ClimateController_Relay10'),
-  fans: itemRegistry.getItem('ZoneDFans_Switch'),
-};
+  global.zoneC = global.zoneC || {
+    zoneName: 'C',
+    desiredTemp: 75,
+    desiredHumid: 90,
+    currentTemp: itemRegistry
+      .getItem('ClimateSHT10Array_TemperatureZoneC')
+      .getState(),
+    currentHumid: itemRegistry
+      .getItem('ClimateSHT10Array_HumidityZoneC')
+      .getState(),
+    relay: itemRegistry.getItem('ClimateController_Relay9'),
+    fans: itemRegistry.getItem('ZoneCFans_Switch'),
+  };
 
-// Run zoneCheck() for enabled zones
-var enabledA =
-  itemRegistry.getItem('ClimateSHT10Array_ZoneA').getState() === 'ON';
-if (enabledA) {
-  zoneCheck(global.zoneA);
-}
+  global.zoneD = global.zoneD || {
+    zoneName: 'D',
+    desiredTemp: 75,
+    desiredHumid: 90,
+    currentTemp: itemRegistry
+      .getItem('ClimateSHT10Array_TemperatureZoneD')
+      .getState(),
+    currentHumid: itemRegistry
+      .getItem('ClimateSHT10Array_HumidityZoneD')
+      .getState(),
+    relay: itemRegistry.getItem('ClimateController_Relay10'),
+    fans: itemRegistry.getItem('ZoneDFans_Switch'),
+  };
 
-var enabledB =
-  itemRegistry.getItem('ClimateSHT10Array_ZoneB').getState() === 'ON';
-if (enabledB) {
-  zoneCheck(global.zoneB);
-}
+  // Run zoneCheck() for enabled zones
+  var enabledA =
+    itemRegistry.getItem('ClimateSHT10Array_ZoneA').getState() === 'ON';
+  if (enabledA) {
+    zoneCheck(global.zoneA);
+  }
 
-var enabledC =
-  itemRegistry.getItem('ClimateSHT10Array_ZoneC').getState() === 'ON';
-if (enabledC) {
-  zoneCheck(global.zoneC);
-}
+  var enabledB =
+    itemRegistry.getItem('ClimateSHT10Array_ZoneB').getState() === 'ON';
+  if (enabledB) {
+    zoneCheck(global.zoneB);
+  }
 
-var enabledD =
-  itemRegistry.getItem('ClimateSHT10Array_ZoneD').getState() === 'ON';
-if (enabledD) {
-  zoneCheck(global.zoneD);
-}
+  var enabledC =
+    itemRegistry.getItem('ClimateSHT10Array_ZoneC').getState() === 'ON';
+  if (enabledC) {
+    zoneCheck(global.zoneC);
+  }
 
-// Check state of relays, if none are ON turn OFF pump
-// TODO: Make sure QOS is 2 on all these MQTT topics
-var pumpSwitch = itemRegistry.getItem('Water_Pump_Switch');
-if (
-  pumpSwitch.getState() === 'ON' &&
-  global.zoneA.relay === 'OFF' &&
-  global.zoneB.relay === 'OFF' &&
-  global.zoneC.relay === 'OFF' &&
-  global.zoneD.relay === 'OFF'
-) {
-  events.sendCommand(pumpSwitch, 'OFF');
-}
+  var enabledD =
+    itemRegistry.getItem('ClimateSHT10Array_ZoneD').getState() === 'ON';
+  if (enabledD) {
+    zoneCheck(global.zoneD);
+  }
+
+  // Check state of relays, if none are ON turn OFF pump
+  // TODO: Make sure QOS is 2 on all these MQTT topics
+  var pumpSwitch = itemRegistry.getItem('Water_Pump_Switch');
+  if (
+    pumpSwitch.getState() === 'ON' &&
+    global.zoneA.relay === 'OFF' &&
+    global.zoneB.relay === 'OFF' &&
+    global.zoneC.relay === 'OFF' &&
+    global.zoneD.relay === 'OFF'
+  ) {
+    events.sendCommand(pumpSwitch, 'OFF');
+  }
+})(this);
 
 function zoneCheck(zone) {
   logger.info('* * * Zone ' + zone.zoneName + ' * * *');
@@ -141,10 +149,11 @@ function zoneCheck(zone) {
     // Check to see if cycle timer is running, if so skip this cycle.
     if (!zone.cycleTimer) {
       // See if mistTimer or fanTimer is already running, is so skip this cycle.
-      if (!zone.mistTimer && !zone.fanTimerr) {
+      if (!zone.mistTimer && !zone.fanTimer) {
         logger.info('Starting Humidity Cycle.');
         if (zone.relay.getState() === 'OFF') {
           // If the Pump Switch is OFF, turn it ON
+          var pumpSwitch = itemRegistry.getItem('Water_Pump_Switch');
           if (pumpSwitch.getState() === 'OFF') {
             events.sendCommand(pumpSwitch, 'ON');
           }
