@@ -4,8 +4,18 @@ const createTimer = jest.fn((timeout, callback) => ({
 }));
 const logger = jest.fn();
 
-let pumpSwitchState = 'OFF';
+global.events = {
+  sendCommand: jest.fn(),
+};
+
+global.OnOffType = {
+  ON: 'ON',
+  OFF: 'OFF',
+};
+
+let pumpSwitchState = global.OnOffType.OFF;
 let currentTemp = 90;
+let relayState = global.OnOffType.ON;
 const PUMP_SWITCH_NAME = 'Water_Pump_Switch';
 
 global.Java = {
@@ -41,7 +51,7 @@ global.Java = {
 global.itemRegistry = {
   getItem: (item) => ({
     name: item,
-    getState: () => {
+    getState: jest.fn(() => {
       switch (item) {
         case PUMP_SWITCH_NAME:
           return pumpSwitchState;
@@ -50,23 +60,17 @@ global.itemRegistry = {
           return currentTemp;
           break;
         case 'ClimateSHT10Array_HumidityZoneTest Zone':
-          return currentTemp;
+          return currentHumid;
+          break;
+        case 'ClimateController_RelayTest Zone':
+          return relayState;
           break;
         default:
           return `getItem ${item} getState`;
           break;
       }
-    },
+    }),
   }),
-};
-
-global.events = {
-  sendCommand: jest.fn(),
-};
-
-global.OnOffType = {
-  ON: 'ON',
-  OFF: 'OFF',
 };
 
 const { zoneCheck } = require('../zonecheck');
@@ -76,9 +80,9 @@ function createFreshZone() {
     zoneName: 'Test Zone',
     desiredTemp: 75,
     desiredHumid: 90,
-    currentHumid: jest.fn(),
     relay: { getState: jest.fn(() => 'OFF'), name: 'relay' },
     fans: itemRegistry.getItem('ZoneDFans_Switch'),
+    relayName: 'ClimateController_RelayTest Zone',
   };
 }
 
@@ -120,23 +124,26 @@ describe('zonecheck', () => {
     expect(createTimer).not.toHaveBeenCalled();
   });
 
-  it.skip('turns off the pump if its off when creating a mister', () => {
+  it('turns on the pump if its off when creating a mister', () => {
     const zone = createFreshZone();
-    pumpSwitchState = global.OnOffType.ON;
+    pumpSwitchState = global.OnOffType.OFF;
     currentHumid = 50;
     zoneCheck(zone);
     expect(global.events.sendCommand).toHaveBeenCalledWith(
       expect.objectContaining({ name: PUMP_SWITCH_NAME }),
-      'OFF'
+      'ON'
     );
   });
 
-  it.only('shuts it off when its over humidity', () => {
+  it('shuts it off when its over humidity', () => {
     const zone = createFreshZone();
-    zone.relay.getState = jest.fn(() => 'ON');
+    zone.relay.getState = jest.fn(() => global.OnOffType.ON);
     currentHumid = 91;
     zoneCheck(zone);
-    expect(global.events.sendCommand).toHaveBeenCalledWith(zone.relay, 'OFF');
+    expect(global.events.sendCommand).toHaveBeenCalledWith(
+      zone.relay,
+      global.OnOffType.OFF
+    );
   });
 
   it('logs when in range', () => {
@@ -162,6 +169,7 @@ describe('zonecheck', () => {
     zoneCheck(zone);
     zone.cycleTimer.callback();
     zone.mistTimer.callback();
+    zone.delayFanTimer.callback();
     zone.fanTimer.callback();
     zoneCheck(zone);
     expect(zone.cycleTimer).not.toBeNull();

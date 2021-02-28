@@ -86,7 +86,6 @@ function allRelaysAreOff() {
 
 function pumpCheck() {
   var pumpSwitch = getPump();
-  console.log('checking pump', pumpSwitch.getState());
   if (pumpSwitch.getState() === OnOffType.ON && allRelaysAreOff()) {
       events.sendCommand(pumpSwitch, OnOffType.OFF);
     logger.info('Turning off Water Pump.');
