@@ -55,25 +55,28 @@ global.itemRegistry = {
       switch (item) {
         case PUMP_SWITCH_NAME:
           return pumpSwitchState;
-          break;
         case 'ClimateSHT10Array_TemperatureZoneTest Zone':
           return currentTemp;
-          break;
         case 'ClimateSHT10Array_HumidityZoneTest Zone':
           return currentHumid;
-          break;
         case 'ClimateController_RelayTest Zone':
           return relayState;
-          break;
+        case 'ClimateController_Relay1':
+        case 'ClimateController_Relay2':
+        case 'ClimateController_Relay9':
+        case 'ClimateController_Relay10':
+          return relayState;
         default:
           return `getItem ${item} getState`;
-          break;
       }
     }),
   }),
 };
 
-const { zoneCheck } = require('../zonecheck');
+// jest.mock('../zonecheck');
+
+const moduleUnderTest = require('../zonecheck');
+let { zoneCheck, runCycle } = moduleUnderTest;
 
 function createFreshZone() {
   return {
@@ -173,5 +176,17 @@ describe('zonecheck', () => {
     zone.fanTimer.callback();
     zoneCheck(zone);
     expect(zone.cycleTimer).not.toBeNull();
+  });
+
+  describe('runCycle', () => {
+    it('calls zoneCheck four times', () => {
+      moduleUnderTest.zoneCheck = jest.fn();
+      let fakeGlobal = {};
+      relayState = global.OnOffType.ON;
+      runCycle(fakeGlobal);
+      expect(fakeGlobal.zones.length).toEqual(4);
+      expect(moduleUnderTest.zoneCheck).toHaveBeenCalledTimes(4);
+      moduleUnderTest.zoneCheck.mockRestore();
+    });
   });
 });
