@@ -75,8 +75,8 @@ global.itemRegistry = {
 
 // jest.mock('../zonecheck');
 
-const moduleUnderTest = require('../zonecheck');
-let { zoneCheck, runCycle } = moduleUnderTest;
+const moduleUnderTest = require('./zonecheck');
+let { check, runCycle } = moduleUnderTest.zoneCheck;
 
 function createFreshZone() {
   return {
@@ -99,7 +99,7 @@ describe('zonecheck', () => {
     currentHumid = 50;
     currentTemp = 70;
     expect(zone.cycleTimer).not.toBeDefined();
-    zoneCheck(zone);
+    check(zone);
     expect(zone.cycleTimer).toBeDefined();
     expect(zone.cycleTimer).not.toBeNull();
   });
@@ -108,14 +108,14 @@ describe('zonecheck', () => {
     const zone = createFreshZone();
     zone.cycleTimer = 'x';
     currentHumid = 50;
-    zoneCheck(zone);
+    check(zone);
     expect(createTimer).not.toHaveBeenCalled();
   });
 
   it('does not create timers if the humidity is too high', () => {
     const zone = createFreshZone();
     currentHumid = 91;
-    zoneCheck(zone);
+    check(zone);
     expect(createTimer).not.toHaveBeenCalled();
   });
 
@@ -123,7 +123,7 @@ describe('zonecheck', () => {
     const zone = createFreshZone();
     currentHumid = 50;
     zone.mistTimer = 'x';
-    zoneCheck(zone);
+    check(zone);
     expect(createTimer).not.toHaveBeenCalled();
   });
 
@@ -131,7 +131,7 @@ describe('zonecheck', () => {
     const zone = createFreshZone();
     pumpSwitchState = global.OnOffType.OFF;
     currentHumid = 50;
-    zoneCheck(zone);
+    check(zone);
     expect(global.events.sendCommand).toHaveBeenCalledWith(
       expect.objectContaining({ name: PUMP_SWITCH_NAME }),
       'ON'
@@ -142,7 +142,7 @@ describe('zonecheck', () => {
     const zone = createFreshZone();
     zone.relay.getState = jest.fn(() => global.OnOffType.ON);
     currentHumid = 91;
-    zoneCheck(zone);
+    check(zone);
     expect(global.events.sendCommand).toHaveBeenCalledWith(
       zone.relay,
       global.OnOffType.OFF
@@ -152,7 +152,7 @@ describe('zonecheck', () => {
   it('logs when in range', () => {
     const zone = createFreshZone();
     currentHumid = 90;
-    zoneCheck(zone);
+    check(zone);
     expect(logger).toHaveBeenCalledWith(
       expect.stringMatching('Humidtiy in range')
     );
@@ -161,7 +161,7 @@ describe('zonecheck', () => {
   it('deletes the timer afterwards', () => {
     const zone = createFreshZone();
     currentHumid = 50;
-    zoneCheck(zone);
+    check(zone);
     zone.cycleTimer.callback();
     expect(zone.cycleTimer).toBeNull();
   });
@@ -169,24 +169,24 @@ describe('zonecheck', () => {
   it('recreates the timer after they have all timed out', () => {
     const zone = createFreshZone();
     currentHumid = 50;
-    zoneCheck(zone);
+    check(zone);
     zone.cycleTimer.callback();
     zone.mistTimer.callback();
     zone.delayFanTimer.callback();
     zone.fanTimer.callback();
-    zoneCheck(zone);
+    check(zone);
     expect(zone.cycleTimer).not.toBeNull();
   });
 
   describe('runCycle', () => {
     it('calls zoneCheck four times', () => {
-      moduleUnderTest.zoneCheck = jest.fn();
+      moduleUnderTest.zoneCheck.check = jest.fn();
       let fakeGlobal = {};
       relayState = global.OnOffType.ON;
       runCycle(fakeGlobal);
       expect(fakeGlobal.zones.length).toEqual(4);
-      expect(moduleUnderTest.zoneCheck).toHaveBeenCalledTimes(4);
-      moduleUnderTest.zoneCheck.mockRestore();
+      expect(moduleUnderTest.zoneCheck.check).toHaveBeenCalledTimes(4);
+      moduleUnderTest.zoneCheck.check.mockRestore();
     });
   });
 });

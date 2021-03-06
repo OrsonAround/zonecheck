@@ -1,5 +1,11 @@
 'use strict';
 
+var context = this;
+context.com = context.com || {};
+context.com.adam = context.com.adam || {};
+context.com.adam.zoneCheck = context.com.adam.zoneCheck || {};
+var zoneCheck = context.com.adam.zoneCheck;
+
 var logger = Java.type('org.slf4j.LoggerFactory').getLogger(
   'org.openhab.model.script.Rules.Experiments'
 );
@@ -16,35 +22,46 @@ var fanDelayTimeLen = 60;
 var fanTimeLen = 150;
 var coolFansTimeLen = 60;
 
-function getPump() {
-  var pumpSwitch = itemRegistry.getItem('Water_Pump_Switch');
-  if (!pumpSwitch) {
-    // pump error
-  }
-  return pumpSwitch;
-}
+zoneCheck.WATER_PUMP_SWITCH = 'Water_Pump_Switch';
+zoneCheck.CLIMATE_CONTROLLER_RELAY_1 = 'Climate_Controller_Relay1';
+zoneCheck.CLIMATE_CONTROLLER_RELAY_2 = 'Climate_Controller_Relay2';
+zoneCheck.CLIMATE_CONTROLLER_RELAY_9 = 'Climate_Controller_Relay9';
+zoneCheck.CLIMATE_CONTROLLER_RELAY_10 = 'Climate_Controller_Relay10';
 
-function allRelaysAreOff(global) {
-  for (var i = 0; i < global.zones.length; i++) {
-    var zone = global.zones[i];
-    var off =
-      itemRegistry.getItem(zone.realayName).getState() === OnOffType.OFF;
-    if (!off) {
-      return false;
+zoneCheck.allRelaysAreOff = function allRelaysAreOff() {
+  var registery = itemRegistry.getItems().toArray();
+  var item;
+  var i;
+  var off;
+  for (i = 0; i < registery.length; i++) {
+    item = registery[i];
+    if (item.getName().match(/Climate_Controller_Relay/gi)) {
+      off = item.getState() === OnOffType.OFF;
+      if (!off) {
+        return false;
+      }
     }
   }
   return true;
-}
+};
 
-function pumpCheck(global) {
-  var pumpSwitch = getPump();
-  if (pumpSwitch.getState() === OnOffType.ON && allRelaysAreOff(global)) {
-    events.sendCommand(pumpSwitch, OnOffType.OFF);
+zoneCheck.getPump = function getPump() {
+  try {
+    return itemRegistry.getItem(zoneCheck.WATER_PUMP_SWITCH);
+  } catch (e) {
+    logger.error(zoneCheck.WATER_PUMP_SWITCH + ' not found in registry');
+  }
+};
+
+zoneCheck.pumpCheck = function pumpCheck() {
+  var pumpSwitch = zoneCheck.getPump();
+  if (pumpSwitch.getState() === OnOffType.ON && zoneCheck.allRelaysAreOff()) {
+    events.sendCommand(pumpSwitch.getName(), OnOffType.OFF);
     logger.info('Turning off Water Pump.');
   }
-}
+};
 
-var zoneCheck = function zoneCheck(zone) {
+zoneCheck.check = function check(zone) {
   // Make sure SHT10 array & Relays are actually online -- zigbee switches too?
   // TODO Test that MQTT's LWT is actually working FOR BOTH DEVICES and ALL CHANNELS
   var sht10Status = Things.getThingStatusInfo(
@@ -72,7 +89,7 @@ var zoneCheck = function zoneCheck(zone) {
   zone.fans = itemRegistry.getItem('Zone' + zone.zoneName + 'Fans_Switch');
   zone.relay = itemRegistry.getItem(zone.relayName);
 
-  var pumpSwitch = getPump();
+  var pumpSwitch = zoneCheck.getPump();
 
   logger.info('* * * Zone ' + zone.zoneName + ' * * *');
   logger.info(
@@ -148,7 +165,7 @@ var zoneCheck = function zoneCheck(zone) {
         function () {
           zone.mistTimer = null;
           events.sendCommand(zone.relay, OnOffType.OFF);
-          pumpCheck(global); // TODO this doesn't always work, add few seconds delay?
+          zoneCheck.pumpCheck(); // TODO this doesn't always work, add few seconds delay?
           logger.info(
             'Mist cycle has ended for Zone' +
               zone.zoneName +
@@ -189,7 +206,7 @@ var zoneCheck = function zoneCheck(zone) {
   }
 };
 
-var runCycle = function runCycle(global) {
+zoneCheck.runCycle = function runCycle(global) {
   global.zones = []; // reset
 
   global.zoneA = global.zoneA || {
@@ -229,25 +246,21 @@ var runCycle = function runCycle(global) {
     var enabled =
       itemRegistry.getItem(zone.relayName).getState() === OnOffType.ON;
     if (enabled) {
-      exports.zoneCheck(zone);
+      zoneCheck.check(zone);
     }
   }
 
   // Doesn't fire reliably at the end of mistTimer so run it everytime.
-  pumpCheck(global);
+  zoneCheck.pumpCheck(global);
 };
-
-var exports = {
-  zoneCheck,
-  runCycle,
-};
-
 (function (global) {
-  runCycle(global);
+  // runCycle(global);
   // Doesn't fire reliably at the end of mistTimer so run it everytime.
-  pumpCheck(global);
+  // pumpCheck(global);
 })(this);
 
 if (typeof module === 'object' && typeof module.exports === 'object') {
-  module.exports = exports;
+  module.exports = {
+    zoneCheck: zoneCheck,
+  };
 }
