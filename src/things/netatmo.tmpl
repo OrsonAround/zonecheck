@@ -1,0 +1,3 @@
+Bridge netatmo:netatmoapi:home "Netatmo API" [ clientId="<%= data.NETATMO_CLIENT_ID %>", clientSecret="<%= data.NETATMO_CLIENT_SECRET %>", username = "<%= data.NETATMO_USER_NAME %>", password = "<%= data.NETATMO_PASSWORD %>", readStation=true, readHealthyHomeCoach=false, readThermostat=false, readWelcome=false, readPresence=false] {
+    Thing NAMain inside "Netatmo Inside" [ id="<%= data.NETATMO_MAIN_MAC %>" ]
+}

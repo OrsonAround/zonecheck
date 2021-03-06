@@ -1,0 +1,5 @@
+Switch Climate_Controller_Relay1_Test "Functional Test Relay 1" (zonecheck)
+Switch Climate_Controller_Relay2_Test "Functional Test Relay 2" (zonecheck)
+Switch Climate_Controller_Relay9_Test "Functional Test Relay 9" (zonecheck)
+Switch Climate_Controller_Relay10_Test "Climate_Controller_Relay10" (zonecheck)
+Switch Water_Pump_Switch_Test "Functional Test Water Pump Switch" (zonecheck)
