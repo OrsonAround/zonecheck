@@ -15,12 +15,13 @@ global.OnOffType = {
 
 let pumpSwitchState = global.OnOffType.OFF;
 let currentTemp = 90;
+let currentHumid = 50;
 let relayState = global.OnOffType.ON;
 const PUMP_SWITCH_NAME = 'Water_Pump_Switch';
 
 global.Java = {
-  type: (x) => {
-    switch (x) {
+  type: (typeName) => {
+    switch (typeName) {
       case 'java.time.ZonedDateTime':
         return {
           now: () => ({
@@ -28,12 +29,10 @@ global.Java = {
             plusSeconds: jest.fn((x) => x),
           }),
         };
-        break;
       case 'org.openhab.core.model.script.actions.ScriptExecution':
         return {
           createTimer,
         };
-        break;
       case 'org.openhab.core.model.script.actions.Things':
         return {
           getThingStatusInfo: jest.fn(),
@@ -76,7 +75,8 @@ global.itemRegistry = {
 // jest.mock('../zonecheck');
 
 const moduleUnderTest = require('./zonecheck');
-let { check, runCycle } = moduleUnderTest.zoneCheck;
+
+const { check, runCycle } = moduleUnderTest.zoneCheck;
 
 function createFreshZone() {
   return {
@@ -84,7 +84,7 @@ function createFreshZone() {
     desiredTemp: 75,
     desiredHumid: 90,
     relay: { getState: jest.fn(() => 'OFF'), name: 'relay' },
-    fans: itemRegistry.getItem('ZoneDFans_Switch'),
+    fans: global.itemRegistry.getItem('ZoneDFans_Switch'),
     relayName: 'ClimateController_RelayTest Zone',
   };
 }
@@ -134,7 +134,7 @@ describe('zonecheck', () => {
     check(zone);
     expect(global.events.sendCommand).toHaveBeenCalledWith(
       expect.objectContaining({ name: PUMP_SWITCH_NAME }),
-      'ON'
+      'ON',
     );
   });
 
@@ -145,7 +145,7 @@ describe('zonecheck', () => {
     check(zone);
     expect(global.events.sendCommand).toHaveBeenCalledWith(
       zone.relay,
-      global.OnOffType.OFF
+      global.OnOffType.OFF,
     );
   });
 
@@ -154,7 +154,7 @@ describe('zonecheck', () => {
     currentHumid = 90;
     check(zone);
     expect(logger).toHaveBeenCalledWith(
-      expect.stringMatching('Humidtiy in range')
+      expect.stringMatching('Humidtiy in range'),
     );
   });
 
@@ -181,7 +181,7 @@ describe('zonecheck', () => {
   describe('runCycle', () => {
     it('calls zoneCheck four times', () => {
       moduleUnderTest.zoneCheck.check = jest.fn();
-      let fakeGlobal = {};
+      const fakeGlobal = {};
       relayState = global.OnOffType.ON;
       runCycle(fakeGlobal);
       expect(fakeGlobal.zones.length).toEqual(4);

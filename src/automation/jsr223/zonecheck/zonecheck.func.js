@@ -1,3 +1,5 @@
+/* global Java,scriptExtension,events,OnOffType,automationManager,SimpleRule,load */
+
 'use strict';
 
 var context = this;
@@ -12,11 +14,6 @@ var ScriptExecution = Java.type(
 var ZonedDateTime = Java.type('java.time.ZonedDateTime');
 var CONF_DIR = Java.type('java.lang.System').getenv('OPENHAB_CONF');
 
-scriptExtension.importPreset('RuleSupport');
-scriptExtension.importPreset('RuleSimple');
-
-var origNames = {};
-
 var tests = [
   function testGetPump(next) {
     var pump = zoneCheck.getPump();
@@ -29,7 +26,7 @@ var tests = [
   },
 
   function testAllRelaysAreOff(next) {
-    [1, 2, 9, 10].forEach(function (x) {
+    [1, 2, 9, 10].forEach(function eachRelay(x) {
       events.sendCommand(
         zoneCheck['CLIMATE_CONTROLLER_RELAY_' + x],
         OnOffType.OFF
@@ -37,19 +34,16 @@ var tests = [
     });
     ScriptExecution.createTimer(
       ZonedDateTime.now().plusSeconds(1),
-      function () {
+      function afterEventSet() {
         if (!zoneCheck.allRelaysAreOff()) {
           throw new Error('testAllRelaysAreOff Failed 1');
         }
         logger.info('✓');
 
-        events.sendCommand(
-          zoneCheck.CLIMATE_CONTROLLER_RELAY_9,
-          OnOffType.ON
-        );
+        events.sendCommand(zoneCheck.CLIMATE_CONTROLLER_RELAY_9, OnOffType.ON);
         ScriptExecution.createTimer(
           ZonedDateTime.now().plusSeconds(1),
-          function () {
+          function afterControllerOn() {
             if (zoneCheck.allRelaysAreOff()) {
               throw new Error('testAllRelaysAreOff Failed 2');
             }
@@ -61,9 +55,9 @@ var tests = [
     );
   },
 
-  function test_shutsPumpOff(next) {
+  function testShutsPumpOff(next) {
     events.sendCommand(zoneCheck.WATER_PUMP_SWITCH, OnOffType.ON);
-    [1, 2, 9, 10].forEach(function (x) {
+    [1, 2, 9, 10].forEach(function eachRelay(x) {
       events.sendCommand(
         zoneCheck['CLIMATE_CONTROLLER_RELAY_' + x],
         OnOffType.OFF
@@ -72,12 +66,12 @@ var tests = [
 
     ScriptExecution.createTimer(
       ZonedDateTime.now().plusSeconds(1),
-      function () {
+      function afterRelaySet() {
         zoneCheck.pumpCheck();
 
         ScriptExecution.createTimer(
           ZonedDateTime.now().plusSeconds(1),
-          function () {
+          function afterPumpCheck() {
             if (zoneCheck.getPump().getState() === OnOffType.ON) {
               throw new Error('should have turned pump off');
             }
@@ -89,9 +83,9 @@ var tests = [
     );
   },
 
-  function test_keepsPumpOn(next) {
+  function testKeepsPumpOn(next) {
     events.sendCommand(zoneCheck.WATER_PUMP_SWITCH, OnOffType.ON);
-    [1, 9, 10].forEach(function (x) {
+    [1, 9, 10].forEach(function eachRelay(x) {
       events.sendCommand(
         zoneCheck['CLIMATE_CONTROLLER_RELAY_' + x],
         OnOffType.OFF
@@ -104,12 +98,12 @@ var tests = [
 
     ScriptExecution.createTimer(
       ZonedDateTime.now().plusSeconds(1),
-      function () {
+      function afterRelayOn() {
         zoneCheck.pumpCheck();
 
         ScriptExecution.createTimer(
           ZonedDateTime.now().plusSeconds(1),
-          function () {
+          function afterPumpCheck() {
             if (zoneCheck.getPump().getState() !== OnOffType.ON) {
               throw new Error('should have kept pump on ');
             }
@@ -119,26 +113,23 @@ var tests = [
         );
       }
     );
-  },
+  }
 ];
 
 function setTestNames(next) {
   zoneCheck.origWaterPump = zoneCheck.WATER_PUMP_SWITCH;
   zoneCheck.WATER_PUMP_SWITCH = 'Water_Pump_Switch_Test';
-  [1, 2, 9, 10].forEach(function (x) {
-    zoneCheck['origClimateControllerRelay' + x] =
-      zoneCheck['CLIMATE_CONTROLLER_RELAY_' + x];
-    zoneCheck['CLIMATE_CONTROLLER_RELAY_' + x] =
-      'Climate_Controller_Relay' + x + '_Test';
+  [1, 2, 9, 10].forEach(function eachRelay(x) {
+    zoneCheck['origClimateControllerRelay' + x] = zoneCheck['CLIMATE_CONTROLLER_RELAY_' + x];
+    zoneCheck['CLIMATE_CONTROLLER_RELAY_' + x] = 'Climate_Controller_Relay' + x + '_Test';
   });
   next();
 }
 
 function restoreTestNames(next) {
   zoneCheck.WATER_PUMP_SWITCH = zoneCheck.origWaterPump;
-  [1, 2, 9, 10].forEach(function (x) {
-    zoneCheck['CLIMATE_CONTROLLER_RELAY_' + x] =
-      zoneCheck['origClimateControllerRelay' + x];
+  [1, 2, 9, 10].forEach(function eachRelay(x) {
+    zoneCheck['CLIMATE_CONTROLLER_RELAY_' + x] = zoneCheck['origClimateControllerRelay' + x];
   });
 
   next();
@@ -148,12 +139,12 @@ function runner() {
   var args = Array.prototype.slice.call(arguments);
   var fn = args.shift();
   var nxt = args.length
-    ? function () {
-        runner.apply(null, args);
-      }
-    : function () {
-        logger.info('done');
-      };
+    ? function next() {
+      runner.apply(null, args);
+    }
+    : function done() {
+      logger.info('done');
+    };
   try {
     logger.info('Start test ' + fn.name);
     fn(nxt);
@@ -163,19 +154,24 @@ function runner() {
   }
 }
 
-var sRule = new SimpleRule({
-  execute: function () {
-    load(CONF_DIR + '/automation/jsr223/zonecheck/zonecheck.js');
-    logger.info('**** in test mode, starting tests ****');
-    var allTests = [].concat(setTestNames, tests, restoreTestNames);
-    try {
-      runner.apply(null, allTests);
-    } catch (e) {
-      logger.error('One or more tests failed: ' + e.message);
+scriptExtension.importPreset('RuleSupport');
+scriptExtension.importPreset('RuleSimple');
+
+(function createRule() {
+  var allTests = [].concat(setTestNames, tests, restoreTestNames);
+  var sRule = new SimpleRule({
+    execute: function execute() {
+      load(CONF_DIR + '/automation/jsr223/zonecheck/zonecheck.js');
+      logger.info('**** in test mode, starting tests ****');
+      try {
+        runner.apply(null, allTests);
+      } catch (e) {
+        logger.error('One or more tests failed: ' + e.message);
+      }
     }
-  },
-});
+  });
 
-sRule.name = 'ZoneCheck Fuctional Test';
+  sRule.name = 'ZoneCheck Fuctional Test';
 
-automationManager.addRule(sRule);
+  automationManager.addRule(sRule);
+}());

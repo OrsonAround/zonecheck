@@ -1,10 +1,6 @@
-'use strict';
+/* global Java,itemRegistry,OnOffType,events */
 
-var context = this;
-context.com = context.com || {};
-context.com.adam = context.com.adam || {};
-context.com.adam.zoneCheck = context.com.adam.zoneCheck || {};
-var zoneCheck = context.com.adam.zoneCheck;
+'use strict';
 
 var logger = Java.type('org.slf4j.LoggerFactory').getLogger(
   'org.openhab.model.script.Rules.Experiments'
@@ -20,7 +16,12 @@ var cycleTimeLen = 600; // TODO: Should this be a per zone setting exposed in Op
 var mistTimeLen = 150; // One species might require more/less water -- or just rely on humidity
 var fanDelayTimeLen = 60;
 var fanTimeLen = 150;
-var coolFansTimeLen = 60;
+
+var context = this;
+context.com = context.com || {};
+context.com.adam = context.com.adam || {};
+context.com.adam.zoneCheck = context.com.adam.zoneCheck || {};
+var zoneCheck = context.com.adam.zoneCheck; // eslint-disable-line vars-on-top
 
 zoneCheck.WATER_PUMP_SWITCH = 'Water_Pump_Switch';
 zoneCheck.CLIMATE_CONTROLLER_RELAY_1 = 'Climate_Controller_Relay1';
@@ -33,7 +34,7 @@ zoneCheck.allRelaysAreOff = function allRelaysAreOff() {
   var item;
   var i;
   var off;
-  for (i = 0; i < registery.length; i++) {
+  for (i = 0; i < registery.length; i += 1) {
     item = registery[i];
     if (item.getName().match(/Climate_Controller_Relay/gi)) {
       off = item.getState() === OnOffType.OFF;
@@ -51,6 +52,7 @@ zoneCheck.getPump = function getPump() {
   } catch (e) {
     logger.error(zoneCheck.WATER_PUMP_SWITCH + ' not found in registry');
   }
+  return undefined;
 };
 
 zoneCheck.pumpCheck = function pumpCheck() {
@@ -67,15 +69,17 @@ zoneCheck.check = function check(zone) {
   var sht10Status = Things.getThingStatusInfo(
     'mqtt:topic:49a597ce3e:1cc6ab4e6e'
   );
-  if (sht10Status == 'OFFLINE') {
+  var widgetLords = Things.getThingStatusInfo(
+    'mqtt:topic:49a597ce3e:23f859d9dc'
+  );
+  var pumpSwitch = zoneCheck.getPump();
+
+  if (sht10Status === 'OFFLINE') {
     logger.info('SHT10 Array is OFFLINE');
     return;
   }
 
-  var widgetLords = Things.getThingStatusInfo(
-    'mqtt:topic:49a597ce3e:23f859d9dc'
-  );
-  if (widgetLords == 'OFFLINE') {
+  if (widgetLords === 'OFFLINE') {
     logger.info('Widget Lords Relays OFFLINE');
     return;
   }
@@ -89,20 +93,18 @@ zoneCheck.check = function check(zone) {
   zone.fans = itemRegistry.getItem('Zone' + zone.zoneName + 'Fans_Switch');
   zone.relay = itemRegistry.getItem(zone.relayName);
 
-  var pumpSwitch = zoneCheck.getPump();
-
   logger.info('* * * Zone ' + zone.zoneName + ' * * *');
   logger.info(
-    'Current Temperature: ' +
-      zone.currentTemp +
-      ' Desired Temperature: ' +
-      zone.desiredTemp
+    'Current Temperature: '
+      + zone.currentTemp
+      + ' Desired Temperature: '
+      + zone.desiredTemp
   );
   logger.info(
-    'Current Humidity: ' +
-      zone.currentHumid +
-      ' Desired Humidty: ' +
-      zone.desiredHumid
+    'Current Humidity: '
+      + zone.currentHumid
+      + ' Desired Humidty: '
+      + zone.desiredHumid
   );
 
   // Temperature
@@ -115,24 +117,24 @@ zoneCheck.check = function check(zone) {
   } else if (zone.currentTemp > zone.desiredTemp) {
     logger.info('Temperature too high.');
     // Turn on fans then turn off using a different fan timer
-    //events.sendCommand(zone.fans, OnOffType.ON);
-    //zone.coolFansTimer = ScriptExecution.createTimer(
+    // events.sendCommand(zone.fans, OnOffType.ON);
+    // zone.coolFansTimer = ScriptExecution.createTimer(
     //  ZonedDateTime.now().plusSeconds(coolFansTimeLen),
     //  function() {
     //    zone.coolFansTimer = null;
     //    events.sendCommand(zone.fans, OnOffType.OFF);
     //  }
-    //);
+    // );
   } else {
     logger.info('Temperature in range.');
   }
   // Humidity
   if (zone.currentHumid < zone.desiredHumid) {
     if (
-      !zone.cycleTimer &&
-      !zone.mistTimer &&
-      !zone.delayFanTimer &&
-      !zone.fanTimer
+      !zone.cycleTimer
+      && !zone.mistTimer
+      && !zone.delayFanTimer
+      && !zone.fanTimer
     ) {
       logger.info('Starting Humidity Cycle.');
       // If fans are running for cooling, stop them and cancel that timer
@@ -151,36 +153,38 @@ zoneCheck.check = function check(zone) {
         events.sendCommand(zone.relay, OnOffType.ON);
         logger.info('Turning on Relay.');
       }
-      // Create cycle timer to prevent running humidity cycle more than once in a specified time period
+      // Create cycle timer to prevent running humidity cycle more than
+      // once in a specified time period
       zone.cycleTimer = ScriptExecution.createTimer(
         ZonedDateTime.now().plusSeconds(cycleTimeLen),
-        function () {
+        function removeCycleTimer() {
           zone.cycleTimer = null;
           logger.info('Humidity cycle has ended for Zone ' + zone.zoneName);
         }
       );
-      // Create mist timer - run mister cycle for specified time, turn off mister and create a fan delay timer
+      // Create mist timer - run mister cycle for specified time,
+      // turn off mister and create a fan delay timer
       zone.mistTimer = ScriptExecution.createTimer(
         ZonedDateTime.now().plusSeconds(mistTimeLen),
-        function () {
+        function removeMistTimer() {
           zone.mistTimer = null;
           events.sendCommand(zone.relay, OnOffType.OFF);
           zoneCheck.pumpCheck(); // TODO this doesn't always work, add few seconds delay?
           logger.info(
-            'Mist cycle has ended for Zone' +
-              zone.zoneName +
-              '. Turning on fans.'
+            'Mist cycle has ended for Zone'
+              + zone.zoneName
+              + '. Turning on fans.'
           );
           // Create a delay timer, when it expires turn on the fans
           zone.delayFanTimer = ScriptExecution.createTimer(
             ZonedDateTime.now().plusSeconds(fanDelayTimeLen),
-            function () {
+            function removeFanTimer() {
               zone.delayFanTimer = null;
               events.sendCommand(zone.fans, OnOffType.ON);
               // Create a fan timer, turn off fans when it expires
               zone.fanTimer = ScriptExecution.createTimer(
                 ZonedDateTime.now().plusSeconds(fanTimeLen),
-                function () {
+                function afterFansOn() {
                   zone.fanTimer = null;
                   events.sendCommand(zone.fans, OnOffType.OFF);
                   logger.info('Fan cycle has ended for Zone ' + zone.zoneName);
@@ -192,9 +196,9 @@ zoneCheck.check = function check(zone) {
       );
     } else {
       logger.info(
-        'Low Humidity, but cycle is already running or has ran in the past ' +
-          cycleTimeLen +
-          ' seconds'
+        'Low Humidity, but cycle is already running or has ran in the past '
+          + cycleTimeLen
+          + ' seconds'
       );
     }
   } else if (zone.currentHumid > zone.desiredHumid) {
@@ -207,13 +211,14 @@ zoneCheck.check = function check(zone) {
 };
 
 zoneCheck.runCycle = function runCycle(global) {
+  /* eslint-disable vars-on-top */
   global.zones = []; // reset
 
   global.zoneA = global.zoneA || {
     zoneName: 'A',
     relayName: 'ClimateController_Relay1',
     desiredTemp: 75, // Need to get this from openhab item in the future
-    desiredHumid: 90,
+    desiredHumid: 90
   };
   global.zones.push(global.zoneA);
 
@@ -221,7 +226,7 @@ zoneCheck.runCycle = function runCycle(global) {
     zoneName: 'B',
     relayName: 'ClimateController_Relay2',
     desiredTemp: 75,
-    desiredHumid: 90,
+    desiredHumid: 90
   };
   global.zones.push(global.zoneB);
 
@@ -229,7 +234,7 @@ zoneCheck.runCycle = function runCycle(global) {
     zoneName: 'C',
     relayName: 'ClimateController_Relay9',
     desiredTemp: 75,
-    desiredHumid: 90,
+    desiredHumid: 90
   };
   global.zones.push(global.zoneC);
 
@@ -237,14 +242,17 @@ zoneCheck.runCycle = function runCycle(global) {
     zoneName: 'D',
     relayName: 'ClimateController_Relay10',
     desiredTemp: 75,
-    desiredHumid: 90,
+    desiredHumid: 90
   };
   global.zones.push(global.zoneD);
 
-  for (var i = 0; i < global.zones.length; i++) {
-    var zone = global.zones[i];
-    var enabled =
-      itemRegistry.getItem(zone.relayName).getState() === OnOffType.ON;
+  var ii = global.zones.length;
+  var zone;
+  var enabled;
+
+  for (var i = 0; i < ii; i += 1) {
+    zone = global.zones[i];
+    enabled = itemRegistry.getItem(zone.relayName).getState() === OnOffType.ON;
     if (enabled) {
       zoneCheck.check(zone);
     }
@@ -252,15 +260,16 @@ zoneCheck.runCycle = function runCycle(global) {
 
   // Doesn't fire reliably at the end of mistTimer so run it everytime.
   zoneCheck.pumpCheck(global);
+  /* eslint-enable vars-on-top */
 };
-(function (global) {
+(function main(global) {
   // runCycle(global);
   // Doesn't fire reliably at the end of mistTimer so run it everytime.
   // pumpCheck(global);
-})(this);
+}(this));
 
 if (typeof module === 'object' && typeof module.exports === 'object') {
   module.exports = {
-    zoneCheck: zoneCheck,
+    zoneCheck: zoneCheck
   };
 }

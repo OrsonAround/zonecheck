@@ -1,4 +1,4 @@
-const _template = require('lodash/template');
+const template = require('lodash/template');
 const glob = require('glob');
 
 const fs = require('fs/promises');
@@ -37,13 +37,13 @@ fs.rmdir(path.resolve(process.cwd(), DIST_FOLDER), { recursive: true }).then(
           let result = fileContent;
           let dist = path.join(distDir, `${basename}${extname}`);
           if (extname === '.tmpl') {
-            const compiled = _template(fileContent, { variable: 'data' });
+            const compiled = template(fileContent, { variable: 'data' });
             result = compiled(data);
             dist = path.join(distDir, `${basename}.${type}`);
           }
           await fs.writeFile(dist, result, 'utf8');
-        })
+        }),
       );
     });
-  }
+  },
 );
