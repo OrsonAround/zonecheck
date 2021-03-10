@@ -8,18 +8,18 @@ var logger = Java.type('org.slf4j.LoggerFactory').getLogger(
 
 function attach(context) {
   context.allRelaysAreOff = function allRelaysAreOff() {
-    var registery = itemRegistry.getItems().toArray();
+    var registery = itemRegistry
+      .getItems('Climate_Controller_Relay.*')
+      .toArray();
     var item;
     var i;
     var ii = registery.length;
     var off;
     for (i = 0; i < ii; i += 1) {
       item = registery[i];
-      if (item.getName().match(/Climate_Controller_Relay/gi)) {
-        off = item.getState() === OnOffType.OFF;
-        if (!off) {
-          return false;
-        }
+      off = item.getState() === OnOffType.OFF;
+      if (!off) {
+        return false;
       }
     }
     return true;

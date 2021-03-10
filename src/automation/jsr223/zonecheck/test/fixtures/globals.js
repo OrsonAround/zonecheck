@@ -103,7 +103,7 @@ global.itemRegistry = {
       }
     },
   }),
-  getItems: () => ({
+  getItems: (regexString) => ({
     toArray: () =>
       [
         'Climate_Controller_Relay1',
@@ -112,7 +112,9 @@ global.itemRegistry = {
         'Climate_Controller_Relay10',
         'ClimateSHT10Array_HumidityZoneTest',
         'ClimateSHT10Array_TemperatureZoneTest',
-      ].map((x) => global.itemRegistry.getItem(x)),
+      ]
+        .filter((x) => new RegExp(regexString).test(x))
+        .map((x) => global.itemRegistry.getItem(x)),
   }),
 };
 
