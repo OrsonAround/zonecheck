@@ -161,7 +161,7 @@ scriptExtension.importPreset('RuleSimple');
   var allTests = [].concat(setTestNames, tests, restoreTestNames);
   var sRule = new SimpleRule({
     execute: function execute() {
-      load(CONF_DIR + '/automation/jsr223/zonecheck/zonecheck.js');
+      load(CONF_DIR + '/automation/jsr223/zonecheck/index.js');
       logger.info('**** in test mode, starting tests ****');
       try {
         runner.apply(null, allTests);

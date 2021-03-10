@@ -2,7 +2,7 @@ module.exports = {
   root: true,
   overrides: [
     {
-      files: ['*.js'],
+      files: ['**/*.js'],
       excludedFiles: 'src/**/!(*.spec).js',
       env: {
         node: true,
