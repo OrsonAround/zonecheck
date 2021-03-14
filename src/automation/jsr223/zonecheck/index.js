@@ -1,4 +1,5 @@
-/* global Java,itemRegistry,OnOffType,events,load */
+/* global Java,itemRegistry,OnOffType,scriptExtension,SimpleRule,
+  automationManager,load,TriggerBuilder,Configuration */
 
 'use strict';
 
@@ -9,100 +10,106 @@ var Things = Java.type('org.openhab.core.model.script.actions.Things');
 var CONF_DIR = Java.type('java.lang.System').getenv('OPENHAB_CONF');
 
 function attach(context) {
-  context.WATER_PUMP_SWITCH = 'Water_Pump_Switch';
-  context.CLIMATE_CONTROLLER_RELAY_1 = 'Climate_Controller_Relay1';
-  context.CLIMATE_CONTROLLER_RELAY_2 = 'Climate_Controller_Relay2';
-  context.CLIMATE_CONTROLLER_RELAY_9 = 'Climate_Controller_Relay9';
-  context.CLIMATE_CONTROLLER_RELAY_10 = 'Climate_Controller_Relay10';
+  context.checkRequiredThings = function checkRequiredThings() {
+    // TODO Since things don't have tags, check the underlying items by their tags.
+    [
+      'mqtt:topic:MQTTBroker:Climate_Control',
+      'zigbee:device:984e3b3df4:60a423fffe98d376',
+      'zigbee:device:984e3b3df4:60a423fffe98d486',
+      'zigbee:device:984e3b3df4:60a423fffe98d399',
+      'zigbee:device:984e3b3df4:60a423fffe98d318',
+      'zigbee:device:984e3b3df4:086bd7fffe6e41c6'
+    ].forEach(function iterator(name) {
+      var isOnline = false;
+      var status = Things.getThingStatusInfo(name);
+      if (status) {
+        isOnline = status.getStatus().toString() === 'ONLINE';
+      }
+      if (!isOnline) {
+        logger.warn('Required Thing ' + name + ' is not online.');
+      }
+    });
+  };
+
+  context.adaptPropertyValue = function adaptPropertyValue(item) {
+    var value = item.getState();
+    if (value.toFullString() === 'NULL') {
+      return null;
+    }
+    switch (item.getType()) {
+      case 'Switch':
+        return value === OnOffType.ON;
+      case 'Number':
+        return parseFloat(value);
+      case 'String':
+      default:
+        return value.toFullString();
+    }
+  };
+
+  context.addPropertiesToZone = function addPropertiesToZone(zone) {
+    var items = itemRegistry.getItems(zone.zoneName + '_.*');
+    var allZoneItems = itemRegistry.getItems('ZALL_.*');
+    items.forEach(function iterator(item) {
+      var prop = context.camelize(item.getName().substring(3));
+      zone[prop] = context.adaptPropertyValue(item);
+    });
+
+    allZoneItems.forEach(function iterator(item) {
+      var prop = context.camelize(item.getName().substring(5));
+      zone[prop] = context.adaptPropertyValue(item);
+    });
+  };
 
   context.check = function check(zone) {
-    // Make sure SHT10 array & Relays are actually online -- zigbee switches too?
-    // TODO Test that MQTT's LWT is actually working FOR BOTH DEVICES and ALL CHANNELS
-    var sht10Status = Things.getThingStatusInfo(
-      'mqtt:topic:49a597ce3e:1cc6ab4e6e'
-    );
-    var widgetLords = Things.getThingStatusInfo(
-      'mqtt:topic:49a597ce3e:23f859d9dc'
-    );
-
-    if (sht10Status === 'OFFLINE') {
-      logger.info('SHT10 Array is OFFLINE');
-      return;
-    }
-
-    if (widgetLords === 'OFFLINE') {
-      logger.info('Widget Lords Relays OFFLINE');
-      return;
-    }
-
-    zone.fans = itemRegistry.getItem('Zone' + zone.zoneName + 'Fans_Switch');
-    zone.relay = itemRegistry.getItem(zone.relayName);
-
-    logger.info('* * * Zone ' + zone.zoneName + ' * * *');
+    context.checkRequiredThings();
+    context.addPropertiesToZone(zone);
+    logger.info('* * * Zone Check ' + zone.zoneName + ' * * *');
+    logger.info(JSON.stringify(zone, null, 2));
+    context.checkTemp(zone);
     context.checkHumidity(zone);
-    context.checkHumidity(zone);
+    context.pumpCheck();
   };
 
   context.runCycle = function runCycle(global) {
-    /* eslint-disable vars-on-top */
     global.zones = []; // reset
 
     global.zoneA = global.zoneA || {
-      zoneName: 'A',
-      relayName: 'Climate_Controller_Relay1',
-      desiredTemp: 75, // Need to get this from openhab item in the future
-      desiredHumid: 90
+      zoneName: 'ZA'
     };
     global.zones.push(global.zoneA);
 
     global.zoneB = global.zoneB || {
-      zoneName: 'B',
-      relayName: 'Climate_Controller_Relay2',
-      desiredTemp: 75,
-      desiredHumid: 90
+      zoneName: 'ZB'
     };
     global.zones.push(global.zoneB);
 
     global.zoneC = global.zoneC || {
-      zoneName: 'C',
-      relayName: 'Climate_Controller_Relay9',
-      desiredTemp: 75,
-      desiredHumid: 90
+      zoneName: 'ZC'
     };
     global.zones.push(global.zoneC);
 
     global.zoneD = global.zoneD || {
-      zoneName: 'D',
-      relayName: 'Climate_Controller_Relay10',
-      desiredTemp: 75,
-      desiredHumid: 90
+      zoneName: 'ZD'
     };
     global.zones.push(global.zoneD);
 
-    var ii = global.zones.length;
-    var zone;
-    var enabled;
+    global.zoneE = global.zoneE || {
+      zoneName: 'ZE'
+    };
+    global.zones.push(global.zoneE);
 
-    for (var i = 0; i < ii; i += 1) {
-      zone = global.zones[i];
-      enabled = itemRegistry.getItem(zone.relayName).getState() === OnOffType.ON;
+    logger.info('Checking zones');
+    global.zones.forEach(function eachZone(zone) {
+      var enabled = itemRegistry.getItem(zone.zoneName + '_Enabled').getState()
+        === OnOffType.ON;
       if (enabled) {
         context.check(zone);
       }
-    }
-
-    // Doesn't fire reliably at the end of mistTimer so run it everytime.
-    context.pumpCheck(global);
-    /* eslint-enable vars-on-top */
+    });
   };
   return context;
 }
-
-(function main(global) {
-  // runCycle(global);
-  // Doesn't fire reliably at the end of mistTimer so run it everytime.
-  // pumpCheck(global);
-}(this));
 
 /* istanbul ignore else  */
 if (typeof module === 'object' && typeof module.exports === 'object') {
@@ -127,4 +134,28 @@ if (typeof module === 'object' && typeof module.exports === 'object') {
   load(CONF_DIR + '/automation/jsr223/zonecheck/util.js');
   load(CONF_DIR + '/automation/jsr223/zonecheck/checkHumidity.js');
   load(CONF_DIR + '/automation/jsr223/zonecheck/checkTemp.js');
+
+  scriptExtension.importPreset('RuleSupport');
+  scriptExtension.importPreset('RuleSimple');
+  // eslint-disable-next-line vars-on-top
+  var simpleRuleRunCycle = new SimpleRule({
+    execute: function execute() {
+      context.com.adam.zoneCheck.runCycle(context);
+    }
+  });
+  simpleRuleRunCycle.name = 'ZoneCheck Run Cycle';
+
+  simpleRuleRunCycle.setTriggers([
+    TriggerBuilder.create()
+      .withId('aTimerTrigger')
+      .withTypeUID('timer.GenericCronTrigger')
+      .withConfiguration(
+        new Configuration({
+          cronExpression: '0 * * * * ?'
+        })
+      )
+      .build()
+  ]);
+
+  automationManager.addRule(simpleRuleRunCycle);
 }

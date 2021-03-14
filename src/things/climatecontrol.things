@@ -1,0 +1,46 @@
+Bridge mqtt:broker:MQTTBroker [ host="mosquitto", secure=false, qos=2] {
+  Thing topic Climate_Control "Climate Control" @ "Mushroom" [availibilityTopic="climate/status"] {
+    Channels:
+      Type switch : Relay1 "Relay 1" [stateTopic="climate/relay/1/state" , commandTopic="climate/relay/1/set", on="ON", off="OFF"]
+      Type switch : Relay2 "Relay 2" [stateTopic="climate/relay/2/state" , commandTopic="climate/relay/2/set", on="ON", off="OFF"]
+      Type switch : Relay9 "Relay 9" [stateTopic="climate/relay/9/state" , commandTopic="climate/relay/9/set", on="ON", off="OFF"]
+      Type switch : Relay10 "Relay 10" [stateTopic="climate/relay/10/state" , commandTopic="climate/relay/10/set", on="ON", off="OFF"]
+      Type switch : ZA_Enabled "Zone A" [stateTopic="sht10/zone/A/enabled/state"]
+      Type number : ZA_Temperature "Temperature (Zone A)" [stateTopic="sht10/zone/A/temperature/state"]
+      Type number : ZA_Humidity "Humidity (Zone A)" [stateTopic="sht10/zone/A/humidity/state"]
+      Type number : ZA_DewPoint "Dew Point (Zone A)" [stateTopic="sht10/zone/A/dewpoint/state"]
+      Type switch : ZB_Enabled "Zone B" [stateTopic="sht10/zone/B/enabled/state"]
+      Type number : ZB_Temperature "Temperature (Zone B)" [stateTopic="sht10/zone/B/temperature/state"]
+      Type number : ZB_Humidity "Humidity (Zone B)" [stateTopic="sht10/zone/B/humidity/state"]
+      Type number : ZB_DewPoint "Dew Point (Zone B)"[stateTopic="sht10/zone/B/dewpoint/state"]
+      Type switch : ZC_Enabled "Zone C" [stateTopic="sht10/zone/C/enabled/state"]
+      Type number : ZC_Temperature "Temperature (Zone C)" [stateTopic="sht10/zone/C/temperature/state"]
+      Type number : ZC_Humidity "Humidity (Zone C)" [stateTopic="sht10/zone/C/humidity/state"]
+      Type number : ZC_DewPoint "Dew Point (Zone C)" [stateTopic="sht10/zone/C/dewpoint/state"]
+      Type switch : ZD_Enabled "Zone D" [stateTopic="sht10/zone/D/enabled/state"]
+      Type number : ZD_Temperature "Temperature (Zone D)"  [stateTopic="sht10/zone/D/temperature/state"]
+      Type number : ZD_Humidity "Humidity (Zone D)" [stateTopic="sht10/zone/D/humidity/state"]
+      Type number : ZD_DewPoint "Dew Point (Zone D)" [stateTopic="sht10/zone/D/dewpoint/state"]
+      Type switch : ZE_Enabled "Zone E" [stateTopic="sht10/zone/E/enabled/state"]
+      Type number : ZE_Temperature "Temperature (Zone E)" [stateTopic="sht10/zone/E/temperature/state"]
+      Type number : ZE_Humidity "Humidity (Zone E)" [stateTopic="sht10/zone/E/humidity/state"]
+      Type number : ZE_DewPoint "Dew Point (Zone E)" [stateTopic="sht10/zone/E/dewpoint/state"]
+  }
+  
+  Thing topic EnviroPlus "EnviroPlus" @ "Mushroom" [availibilityTopic="climate/status"] {
+    Channels:
+      Type number : EnviroPlus_Temperature "Temperature" [stateTopic="home/enviroplus/state", transformationPattern="JSONPATH:$.temperature_f"]
+      Type number : EnviroPlus_CPUTemperature "CPU Temperature" [stateTopic="home/enviroplus/state", transformationPattern="JSONPATH:$.cpu_temp"]
+      Type number : EnviroPlus_RawTemperature "Raw Temperature" [stateTopic="home/enviroplus/state", transformationPattern="JSONPATH:$.temperature_fnc"]
+      Type number : EnviroPlus_Humidity "Humidity" [stateTopic="home/enviroplus/state", transformationPattern="JSONPATH:$.humidity"]
+      //TODO Needs implemented in mqtt.py Type number : Type number : EnviroPlus_DewPoint "DewPoint" [stateTopic="home/enviroplus/state", transformationPattern="JSONPATH:$.dewpoint"]
+      Type number : EnviroPlus_Pressure "Pressure" [stateTopic="home/enviroplus/state", transformationPattern="JSONPATH:$.pressure"]
+      Type number : EnviroPlus_PM1 "PM1" [stateTopic="home/enviroplus/state", transformationPattern="JSONPATH:$.pm1"]
+      Type number : EnviroPlus_PM25 "PM2.5" [stateTopic="home/enviroplus/state", transformationPattern="JSONPATH:$.pm25"]
+      Type number : EnviroPlus_PM10 "PM10" [stateTopic="home/enviroplus/state", transformationPattern="JSONPATH:$.pm10"]
+      Type number : EnviroPlus_Oxidised "Oxidised" [stateTopic="home/enviroplus/state", transformationPattern="JSONPATH:$.oxidised"]
+      Type number : EnviroPlus_Reduced "Reduced" [stateTopic="home/enviroplus/state", transformationPattern="JSONPATH:$.reduced"]
+      Type number : EnviroPlus_NH3 "NH3" [stateTopic="home/enviroplus/state", transformationPattern="JSONPATH:$.nh3"]
+      Type number : EnviroPlus_LUX "LUX" [stateTopic="home/enviroplus/state", transformationPattern="JSONPATH:$.lux"]
+  }
+}

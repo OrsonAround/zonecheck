@@ -1,45 +1,55 @@
-/* global itemRegistry,Java,ZonedDateTime */
+/* global Java,itemRegistry,OnOffType,events */
 
 'use strict';
 
 var logger = Java.type('org.slf4j.LoggerFactory').getLogger(
   'org.openhab.model.script.Rules.Experiments'
 );
+
+/*
 var ScriptExecution = Java.type(
   'org.openhab.core.model.script.actions.ScriptExecution'
 );
 var ZonedDateTime = Java.type('java.time.ZonedDateTime');
+*/
 
 function attach(context) {
-  context.checkTemp = function checkHumidity(zone) {
-    zone.currentTemp = itemRegistry
-      .getItem('ClimateSHT10Array_TemperatureZone' + zone.zoneName)
-      .getState();
+  context.checkTemp = function checkTemp(zone) {
+    var bufferedTemp = zone.desiredTemp + 0.5;
 
     logger.info(
-      'Current Temperature: '
-        + zone.currentTemp
-        + ' Desired Temperature: '
-        + zone.desiredTemp
+      'Temperature: ' + zone.temperature + ' °F (' + zone.desiredTemp + ' °F)'
     );
-    // Temperature
-    // What about Zone E - Average with EnviroPlus readings?
-    // TODO Turn on fans when temperature is too high / mister isn't on and humiditiy is in range
-    if (zone.currentTemp < zone.desiredTemp) {
-      logger.info(
-        'Temperature too low. TODO: Integrate with Space Heater Script to adjust temperature.'
-      );
-    } else if (zone.currentTemp > zone.desiredTemp) {
+    logger.info(
+      'EnviroPlus Temperature: '
+        + itemRegistry.getItem('EnviroPlus_Temperature').getState()
+        + ' °F'
+    );
+    logger.info('Space Heater: ' + zone.spaceHeater);
+
+    if (zone.temperature < zone.desiredTemp) {
+      logger.info('Temperature too low.');
+      if (zone.zoneName === 'ZE') {
+        logger.info('Turning on Space Heater.');
+        events.sendCommand('ZALL_SpaceHeater', OnOffType.ON);
+      }
+    } else if (zone.temperature > bufferedTemp) {
       logger.info('Temperature too high.');
       // Turn on fans then turn off using a different fan timer
-      // events.sendCommand(zone.fans, OnOffType.ON);
-      // zone.coolFansTimer = ScriptExecution.createTimer(
-      //  ZonedDateTime.now().plusSeconds(coolFansTimeLen),
-      //  function() {
-      //    zone.coolFansTimer = null;
-      //    events.sendCommand(zone.fans, OnOffType.OFF);
-      //  }
-      // );
+      /*
+      events.sendCommand(zone.fans, OnOffType.ON);
+      zone.coolFansTimer = ScriptExecution.createTimer(
+        ZonedDateTime.now().plusSeconds(coolFansTimeLen),
+        function () {
+          zone.coolFansTimer = null;
+          events.sendCommand(zone.fans, OnOffType.OFF);
+        }
+      );
+      */
+      if (zone.zoneName === 'ZE') {
+        logger.info('Turing off Space Heater.');
+        events.sendCommand('ZALL_SpaceHeater', OnOffType.OFF);
+      }
     } else {
       logger.info('Temperature in range.');
     }
@@ -48,6 +58,7 @@ function attach(context) {
   return context;
 }
 
+/* istanbul ignore else  */
 if (typeof module === 'object' && typeof module.exports === 'object') {
   module.exports = {
     attach: attach

@@ -6,6 +6,7 @@ const createTimer = jest.fn((timeout, callback) => ({
 const logger = {
   info: jest.fn(),
   error: jest.fn(),
+  warn: jest.fn(),
 };
 
 global.OnOffType = {
@@ -13,37 +14,53 @@ global.OnOffType = {
   OFF: 'OFF',
 };
 
+String.prototype.toFullString = String.prototype.toString;
+
 const theGlobalState = {
-  pumpSwitchState: global.OnOffType.OFF,
-  currentTemp: 90,
-  currentHumid: 50,
-  relayState1: global.OnOffType.ON,
-  relayState9: global.OnOffType.ON,
-  relayState2: global.OnOffType.ON,
-  relayState10: global.OnOffType.ON,
+  currentTemp: { value: '90', type: 'Number' },
+  currentHumid: { value: '50', type: 'Number' },
+  ZA_Enabled: { value: global.OnOffType.ON, type: 'Switch' },
+  ZC_Enabled: { value: global.OnOffType.ON, type: 'Switch' },
+  ZB_Enabled: { value: global.OnOffType.ON, type: 'Switch' },
+  ZD_Enabled: { value: global.OnOffType.ON, type: 'Switch' },
+  ZE_Enabled: { value: global.OnOffType.ON, type: 'Switch' },
+  TZ_Enabled: { value: global.OnOffType.ON, type: 'Switch' },
+  EnviroPlus_Temperature: { value: '90', type: 'Number' },
+  ZA_Relay: { value: global.OnOffType.ON, type: 'Switch', tags: ['Relay'] },
+  ZB_Relay: { value: global.OnOffType.ON, type: 'Switch', tags: ['Relay'] },
+
+  ClimateSHT10Array_HumidityZoneTest: { value: '20', type: 'Number' },
+  ClimateSHT10Array_TemperatureZoneTest: { value: '20', type: 'Number' },
+  ZALL_WaterPump: { value: global.OnOffType.OFF, type: 'Switch' },
+  ClimateControl_Relay1: { value: global.OnOffType.OFF, type: 'Switch' },
+  ClimateControl_Relay10: { value: global.OnOffType.OFF, type: 'Switch' },
 };
 
 function updateGlobalState(key, val) {
-  theGlobalState[key] = val;
+  theGlobalState[key].value = String(val);
+}
+
+function updateGlobalStateItemType(key, val) {
+  theGlobalState[key].type = val;
 }
 
 function createFreshZone() {
-  theGlobalState.relaystate1 = global.OnOffType.OFF;
-  theGlobalState.relayState2 = global.OnOffType.OFF;
-  theGlobalState.relayState9 = global.OnOffType.OFF;
-  theGlobalState.relayState10 = global.OnOffType.OFF;
-  theGlobalState.currentTemp = 90;
-  theGlobalState.currentHumid = 50;
+  theGlobalState.ZD_Enabled.value = global.OnOffType.OFF;
+  theGlobalState.ZB_Enabled.value = global.OnOffType.OFF;
+  theGlobalState.ZC_Enabled.value = global.OnOffType.OFF;
+  theGlobalState.ZA_Enabled.value = global.OnOffType.OFF;
+  theGlobalState.ZE_Enabled.value = global.OnOffType.OFF;
   return {
-    zoneName: 'Test Zone',
-    desiredTemp: 75,
-    desiredHumid: 90,
-    relayName: 'Climate_Controller_Relay1',
+    zoneName: 'TZ',
   };
 }
 
 global.events = {
   sendCommand: jest.fn(),
+};
+
+const Things = {
+  getThingStatusInfo: jest.fn(),
 };
 
 global.Java = {
@@ -61,9 +78,7 @@ global.Java = {
           createTimer,
         };
       case 'org.openhab.core.model.script.actions.Things':
-        return {
-          getThingStatusInfo: jest.fn(),
-        };
+        return Things;
       case 'java.lang.System':
         return {
           getenv: jest.fn(),
@@ -82,39 +97,78 @@ global.itemRegistry = {
   getItem: (item) => ({
     name: item, // helpful for debugging
     getName: () => item,
+    getType: () => {
+      return theGlobalState[item].type;
+    },
     getState: () => {
+      try {
+        return theGlobalState[item].value;
+      } catch (e) {
+        throw new Error('no value in global state for ' + item);
+      }
+      /*
       switch (item) {
-        case 'Water_Pump_Switch':
+        case 'ZA_WaterPump':
           return theGlobalState.pumpSwitchState;
         case 'ClimateSHT10Array_TemperatureZoneTest Zone':
           return theGlobalState.currentTemp;
         case 'ClimateSHT10Array_HumidityZoneTest Zone':
           return theGlobalState.currentHumid;
-        case 'Climate_Controller_Relay1':
-          return theGlobalState.relayState1;
-        case 'Climate_Controller_Relay2':
-          return theGlobalState.relayState2;
-        case 'Climate_Controller_Relay9':
-          return theGlobalState.relayState9;
-        case 'Climate_Controller_Relay10':
-          return theGlobalState.relayState10;
+        case 'ZA_Enabled':
+          return theGlobalState.ZA_Enabled;
+        case 'ZB_Enabled':
+          return theGlobalState.ZB_Enabled;
+        case 'ZC_Enabled':
+          return theGlobalState.ZC_Enabled;
+        case 'ZD_Enabled':
+          return theGlobalState.ZD_Enabled;
+        case 'ZE_Enabled':
+          return theGlobalState.ZE_Enabled;
         default:
           return `getItem ${item} getState`;
       }
+      */
     },
   }),
   getItems: (regexString) => ({
     toArray: () =>
-      [
-        'Climate_Controller_Relay1',
-        'Climate_Controller_Relay2',
-        'Climate_Controller_Relay9',
-        'Climate_Controller_Relay10',
-        'ClimateSHT10Array_HumidityZoneTest',
-        'ClimateSHT10Array_TemperatureZoneTest',
-      ]
-        .filter((x) => new RegExp(regexString).test(x))
+      Object.keys(theGlobalState)
+        .filter((x) => {
+          return new RegExp(regexString).test(x);
+        })
         .map((x) => global.itemRegistry.getItem(x)),
+    forEach: (fn) => {
+      Object.keys(theGlobalState)
+        .filter((x) => new RegExp(regexString).test(x))
+        .forEach((x) => {
+          fn(global.itemRegistry.getItem(x));
+        });
+    },
+  }),
+  getItemsByTagAndType: (type, ...tags) => ({
+    toArray: () =>
+      Object.entries(theGlobalState)
+        .filter(([, val]) => {
+          return val.type === type;
+        })
+        .filter(([, val]) => {
+          return val.tags?.some((y) => tags.includes(y));
+        })
+        .map(([key]) => {
+          return global.itemRegistry.getItem(key);
+        }),
+    forEach: (fn) => {
+      Object.entries(theGlobalState)
+        .filter(([, val]) => {
+          return val.type === type;
+        })
+        .filter(([, val]) => {
+          return val.tags?.some((y) => tags.includes(y));
+        })
+        .forEach(([key]) => {
+          fn(global.itemRegistry.getItem(key));
+        });
+    },
   }),
 };
 
@@ -123,4 +177,6 @@ module.exports = {
   createTimer,
   createFreshZone,
   updateGlobalState,
+  updateGlobalStateItemType,
+  Things,
 };

@@ -26,6 +26,7 @@ module.exports = {
     },
     {
       files: ['src/**/!(*.spec).js'],
+      excludedFiles: 'src/**/test/**',
       parserOptions: {
         ecmaVersion: 5,
         sourceType: 'script',
@@ -44,7 +45,7 @@ module.exports = {
       },
     },
     {
-      files: ['src/**/*.spec.js'],
+      files: ['src/**/test/**'],
       env: {
         node: true,
         browser: false,

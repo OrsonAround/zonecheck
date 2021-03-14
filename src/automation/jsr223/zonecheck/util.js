@@ -7,14 +7,25 @@ var logger = Java.type('org.slf4j.LoggerFactory').getLogger(
 );
 
 function attach(context) {
+  context.camelize = function camelize(str) {
+    return str
+      .replace(/(?:^\w|[A-Z]|\b\w)/g, function replacer(word, index) {
+        return index === 0 ? word.toLowerCase() : word.toUpperCase();
+      })
+      .replace(/\s+/g, '');
+  };
+
   context.allRelaysAreOff = function allRelaysAreOff() {
     var registery = itemRegistry
-      .getItems('Climate_Controller_Relay.*')
+      .getItemsByTagAndType('Switch', 'Relay')
       .toArray();
     var item;
     var i;
     var ii = registery.length;
     var off;
+    if (ii === 0) {
+      throw new Error('no registry items matched');
+    }
     for (i = 0; i < ii; i += 1) {
       item = registery[i];
       off = item.getState() === OnOffType.OFF;
@@ -27,9 +38,9 @@ function attach(context) {
 
   context.getPump = function getPump() {
     try {
-      return itemRegistry.getItem(context.WATER_PUMP_SWITCH);
+      return itemRegistry.getItem('ZALL_WaterPump');
     } catch (e) {
-      logger.error(context.WATER_PUMP_SWITCH + ' not found in registry');
+      logger.error('ZALL_WaterPump not found in registry');
     }
     return undefined;
   };
@@ -38,13 +49,13 @@ function attach(context) {
     var pumpSwitch = context.getPump();
     if (pumpSwitch.getState() === OnOffType.ON && context.allRelaysAreOff()) {
       events.sendCommand(pumpSwitch, OnOffType.OFF);
-      logger.info('Turning off Water Pump.');
     }
   };
 
   return context;
 }
 
+/* istanbul ignore else  */
 if (typeof module === 'object' && typeof module.exports === 'object') {
   module.exports = {
     attach: attach

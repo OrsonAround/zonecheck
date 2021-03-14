@@ -1,4 +1,4 @@
-/* global Java,itemRegistry,OnOffType,events */
+/* global Java,OnOffType,events */
 
 'use strict';
 
@@ -10,102 +10,122 @@ var ScriptExecution = Java.type(
 );
 var ZonedDateTime = Java.type('java.time.ZonedDateTime');
 
-// Timer Lengths - seconds
-var cycleTimeLen = 600; // TODO: Should this be a per zone setting exposed in OpenHab,
-var mistTimeLen = 150; // One species might require more/less water -- or just rely on humidity
-var fanDelayTimeLen = 60;
-var fanTimeLen = 150;
+function needsCycle(zone) {
+  return (
+    !zone.cycleTimer && !zone.mistTimer && !zone.delayFanTimer && !zone.fanTimer
+  );
+}
 
 function attach(context) {
-  context.checkHumidity = function checkHumidity(zone) {
-    var pumpSwitch = context.getPump();
-
-    zone.currentHumid = itemRegistry
-      .getItem('ClimateSHT10Array_HumidityZone' + zone.zoneName)
-      .getState();
-    logger.info(
-      'Current Humidity: '
-        + zone.currentHumid
-        + ' Desired Humidty: '
-        + zone.desiredHumid
-    );
-    if (zone.currentHumid < zone.desiredHumid) {
-      if (
-        !zone.cycleTimer
-        && !zone.mistTimer
-        && !zone.delayFanTimer
-        && !zone.fanTimer
-      ) {
-        logger.info('Starting Humidity Cycle.');
-        // If fans are running for cooling, stop them and cancel that timer
-        if (zone.coolFansTimer) {
-          zone.coolFansTimer = null; // Does this actually kill the timer?
-          events.sendCommand(zone.fans, OnOffType.OFF);
-        }
-        // If the Pump Switch is OFF, turn it ON
-        if (pumpSwitch.getState() === OnOffType.OFF) {
-          logger.info('Turning on pump switch.');
-          events.sendCommand(pumpSwitch, OnOffType.ON);
-        } else {
-          logger.info('Pump switch already on.');
-        }
-        if (zone.relay.getState() === OnOffType.OFF) {
-          events.sendCommand(zone.relay, OnOffType.ON);
-          logger.info('Turning on Relay.');
-        }
-        // Create cycle timer to prevent running humidity cycle more than
-        // once in a specified time period
-        zone.cycleTimer = ScriptExecution.createTimer(
-          ZonedDateTime.now().plusSeconds(cycleTimeLen),
-          function removeCycleTimer() {
-            zone.cycleTimer = null;
-            logger.info('Humidity cycle has ended for Zone ' + zone.zoneName);
-          }
-        );
-        // Create mist timer - run mister cycle for specified time,
-        // turn off mister and create a fan delay timer
-        zone.mistTimer = ScriptExecution.createTimer(
-          ZonedDateTime.now().plusSeconds(mistTimeLen),
-          function removeMistTimer() {
-            zone.mistTimer = null;
-            events.sendCommand(zone.relay, OnOffType.OFF);
-            context.pumpCheck(); // TODO this doesn't always work, add few seconds delay?
-            logger.info(
-              'Mist cycle has ended for Zone'
-                + zone.zoneName
-                + '. Turning on fans.'
-            );
-            // Create a delay timer, when it expires turn on the fans
-            zone.delayFanTimer = ScriptExecution.createTimer(
-              ZonedDateTime.now().plusSeconds(fanDelayTimeLen),
-              function removeFanTimer() {
-                zone.delayFanTimer = null;
-                events.sendCommand(zone.fans, OnOffType.ON);
-                // Create a fan timer, turn off fans when it expires
-                zone.fanTimer = ScriptExecution.createTimer(
-                  ZonedDateTime.now().plusSeconds(fanTimeLen),
-                  function afterFansOn() {
-                    zone.fanTimer = null;
-                    events.sendCommand(zone.fans, OnOffType.OFF);
-                    logger.info(
-                      'Fan cycle has ended for Zone ' + zone.zoneName
-                    );
-                  }
-                );
-              }
-            );
-          }
-        );
-      } else {
+  context.createCycleTimer = function createCycleTimer(zone) {
+    zone.cycleTimer = ScriptExecution.createTimer(
+      ZonedDateTime.now().plusSeconds(zone.cycleTime),
+      function onTimeout() {
+        zone.cycleTimer = null;
         logger.info(
-          'Low Humidity, but cycle is already running or has ran in the past '
-            + cycleTimeLen
-            + ' seconds'
+          '* * * * *      Zone ' + zone.zoneName + '       * * * * *'
         );
+        logger.info('Humidity cycle has ended for Zone ' + zone.zoneName);
       }
-    } else if (zone.currentHumid > zone.desiredHumid) {
-      if (zone.relay.getState() === OnOffType.ON) {
-        events.sendCommand(zone.relay, OnOffType.OFF);
+    );
+  };
+
+  context.createFanTimer = function createFanTimer(zone) {
+    zone.fanTimer = ScriptExecution.createTimer(
+      ZonedDateTime.now().plusSeconds(zone.fanTime),
+      function onTimeout() {
+        zone.fanTimer = null;
+        events.sendCommand(zone.zoneName + '_FanSwitch', OnOffType.OFF);
+        logger.info(
+          '* * * * *      Zone ' + zone.zoneName + '       * * * * *'
+        );
+        logger.info('Fan cycle has ended for Zone ' + zone.zoneName);
+      }
+    );
+  };
+
+  context.createDelayFanTimer = function createDelayFanTimer(zone) {
+    zone.delayFanTimer = ScriptExecution.createTimer(
+      ZonedDateTime.now().plusSeconds(zone.fanDelayTime),
+      function onTimeout() {
+        zone.delayFanTimer = null;
+        logger.info(
+          '* * * * *      Zone ' + zone.zoneName + '       * * * * *'
+        );
+        logger.info('Turning on fans.');
+        events.sendCommand(zone.zoneName + '_FanSwitch', OnOffType.ON);
+        // Create a fan timer, turn off fans when it expires
+        context.createFanTimer(zone);
+      }
+    );
+  };
+
+  context.createMistTimer = function createMistTimer(zone) {
+    zone.mistTimer = ScriptExecution.createTimer(
+      ZonedDateTime.now().plusSeconds(zone.mistTime),
+      function onTimeout() {
+        zone.mistTimer = null;
+        events.sendCommand(zone.zoneName + '_Relay', OnOffType.OFF);
+        logger.info(
+          '* * * * *      Zone ' + zone.zoneName + '       * * * * *'
+        );
+        logger.info(
+          'Mist cycle has ended for Zone'
+            + zone.zoneName
+            + '. Turning on fans in .'
+            + zone.fanDelayTime
+            + ' seconds.'
+        );
+        // Create a delay timer, when it expires turn on the fans
+        context.createDelayFanTimer(zone);
+      }
+    );
+  };
+
+  context.onHumidityTooLow = function onHumidityTooLow(zone) {
+    if (needsCycle(zone)) {
+      logger.info('Starting Humidity Cycle.');
+
+      logger.info('Water Pump: ' + zone.waterPump);
+      logger.info('Turning on pump switch.');
+      logger.info('Relay: ' + zone.realy);
+      logger.info('Turning on Relay.');
+      events.sendCommand(zone.zoneName + '_Relay', OnOffType.ON);
+      events.sendCommand('ZALL_WaterPump', OnOffType.ON);
+
+      // If fans are running for cooling, stop them and cancel that timer
+      if (zone.coolFansTimer) {
+        zone.coolFansTimer.cancel();
+        zone.coolFansTimer = null;
+        events.sendCommand(zone.zoneName + '_FanSwitch', OnOffType.OFF);
+        logger.info('Cooling fans turned OFF.');
+      }
+
+      context.createCycleTimer(zone);
+      context.createMistTimer(zone);
+    } else {
+      logger.info(
+        'Low Humidity, but cycle is already running or has ran in the past '
+          + zone.cycleTime
+          + ' seconds'
+      );
+    }
+  };
+
+  context.checkHumidity = function checkHumidity(zone) {
+    logger.info(
+      'Humidity: ' + zone.humidity + ' % (' + zone.desiredHumid + ' %)'
+    );
+
+    logger.info('Dew Point: ' + zone.dewPoint + ' °F');
+
+    if (zone.humidity < zone.desiredHumid) {
+      logger.info('Humidity too low.');
+      context.onHumidityTooLow(zone);
+    } else if (zone.humidity > zone.desiredHumid) {
+      if (zone.relay) {
+        logger.info('Turning off Relay (' + zone.zoneName + ')');
+        events.sendCommand(zone.zoneName + '_Relay', OnOffType.OFF);
       }
     } else {
       logger.info('Humidtiy in range.');
