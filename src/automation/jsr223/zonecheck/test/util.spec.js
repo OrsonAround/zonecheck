@@ -10,7 +10,7 @@ const zoneCheck = {};
 require('../util').attach(zoneCheck);
 
 const {
-  allRelaysAreOff, getPump, pumpCheck, camelize,
+  allRelaysAreOff, getPump, checkPump, camelize,
 } = zoneCheck;
 
 describe('zonecheck utils', () => {
@@ -57,7 +57,7 @@ describe('zonecheck utils', () => {
     updateGlobalState('ZA_Relay', global.OnOffType.OFF);
     updateGlobalState('ZB_Relay', global.OnOffType.OFF);
     updateGlobalState('ZALL_WaterPump', global.OnOffType.ON);
-    pumpCheck();
+    checkPump();
     expect(global.events.sendCommand).toHaveBeenCalledWith(
       expect.objectContaining({ name: 'ZALL_WaterPump' }),
       global.OnOffType.OFF,
@@ -68,7 +68,7 @@ describe('zonecheck utils', () => {
     updateGlobalState('ZA_Relay', global.OnOffType.ON);
     updateGlobalState('ZB_Relay', global.OnOffType.OFF);
     updateGlobalState('ZALL_WaterPump', global.OnOffType.ON);
-    pumpCheck();
+    checkPump();
     expect(global.events.sendCommand).not.toHaveBeenCalled();
   });
 

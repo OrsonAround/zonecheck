@@ -14,9 +14,9 @@ describe('globals', () => {
     ).toHaveLength(2);
     expect(
       global.itemRegistry
-        .getItems('ClimateControl_Relay\\d{2}')
+        .getItems('Z[A-E]_Enabled')
         .toArray()[0]
         .getName(),
-    ).toEqual('ClimateControl_Relay10');
+    ).toEqual('ZA_Enabled');
   });
 });

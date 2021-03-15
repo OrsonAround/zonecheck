@@ -17,8 +17,6 @@ global.OnOffType = {
 String.prototype.toFullString = String.prototype.toString;
 
 const theGlobalState = {
-  currentTemp: { value: '90', type: 'Number' },
-  currentHumid: { value: '50', type: 'Number' },
   ZA_Enabled: { value: global.OnOffType.ON, type: 'Switch' },
   ZC_Enabled: { value: global.OnOffType.ON, type: 'Switch' },
   ZB_Enabled: { value: global.OnOffType.ON, type: 'Switch' },
@@ -28,12 +26,9 @@ const theGlobalState = {
   EnviroPlus_Temperature: { value: '90', type: 'Number' },
   ZA_Relay: { value: global.OnOffType.ON, type: 'Switch', tags: ['Relay'] },
   ZB_Relay: { value: global.OnOffType.ON, type: 'Switch', tags: ['Relay'] },
-
   ClimateSHT10Array_HumidityZoneTest: { value: '20', type: 'Number' },
   ClimateSHT10Array_TemperatureZoneTest: { value: '20', type: 'Number' },
   ZALL_WaterPump: { value: global.OnOffType.OFF, type: 'Switch' },
-  ClimateControl_Relay1: { value: global.OnOffType.OFF, type: 'Switch' },
-  ClimateControl_Relay10: { value: global.OnOffType.OFF, type: 'Switch' },
 };
 
 function updateGlobalState(key, val) {
@@ -106,28 +101,6 @@ global.itemRegistry = {
       } catch (e) {
         throw new Error('no value in global state for ' + item);
       }
-      /*
-      switch (item) {
-        case 'ZA_WaterPump':
-          return theGlobalState.pumpSwitchState;
-        case 'ClimateSHT10Array_TemperatureZoneTest Zone':
-          return theGlobalState.currentTemp;
-        case 'ClimateSHT10Array_HumidityZoneTest Zone':
-          return theGlobalState.currentHumid;
-        case 'ZA_Enabled':
-          return theGlobalState.ZA_Enabled;
-        case 'ZB_Enabled':
-          return theGlobalState.ZB_Enabled;
-        case 'ZC_Enabled':
-          return theGlobalState.ZC_Enabled;
-        case 'ZD_Enabled':
-          return theGlobalState.ZD_Enabled;
-        case 'ZE_Enabled':
-          return theGlobalState.ZE_Enabled;
-        default:
-          return `getItem ${item} getState`;
-      }
-      */
     },
   }),
   getItems: (regexString) => ({

@@ -68,7 +68,7 @@ function attach(context) {
     logger.info(JSON.stringify(zone, null, 2));
     context.checkTemp(zone);
     context.checkHumidity(zone);
-    context.pumpCheck();
+    context.checkPump();
   };
 
   context.runCycle = function runCycle(global) {

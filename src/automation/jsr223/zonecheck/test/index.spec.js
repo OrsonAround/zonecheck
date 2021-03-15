@@ -56,7 +56,7 @@ describe('zonecheck', () => {
 
   describe('check', () => {
     it('checks the pump', () => {
-      const pumpCheckSpy = jest.spyOn(zoneCheck, 'pumpCheck');
+      const pumpCheckSpy = jest.spyOn(zoneCheck, 'checkPump');
       const zone = createFreshZone();
       check(zone);
       expect(pumpCheckSpy).toHaveBeenCalled();

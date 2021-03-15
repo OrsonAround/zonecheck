@@ -19,21 +19,12 @@ function attach(context) {
     var registery = itemRegistry
       .getItemsByTagAndType('Switch', 'Relay')
       .toArray();
-    var item;
-    var i;
-    var ii = registery.length;
-    var off;
-    if (ii === 0) {
+    if (registery.length === 0) {
       throw new Error('no registry items matched');
     }
-    for (i = 0; i < ii; i += 1) {
-      item = registery[i];
-      off = item.getState() === OnOffType.OFF;
-      if (!off) {
-        return false;
-      }
-    }
-    return true;
+    return [].every.call(registery, function cb(x) {
+      return x.getState() === OnOffType.OFF;
+    });
   };
 
   context.getPump = function getPump() {
@@ -45,7 +36,7 @@ function attach(context) {
     return undefined;
   };
 
-  context.pumpCheck = function pumpCheck() {
+  context.checkPump = function checkPump() {
     var pumpSwitch = context.getPump();
     if (pumpSwitch.getState() === OnOffType.ON && context.allRelaysAreOff()) {
       events.sendCommand(pumpSwitch, OnOffType.OFF);
