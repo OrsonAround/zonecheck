@@ -1,13 +1,27 @@
 {
   "name": "zonecheck",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "openhab project to control zone humidity",
+  "main": "src/automation/jsr223/zonecheck/index.js",
+    "repository": {
+    "type": "git",
+    "url": "git://github.com/donsuhr/zonecheck.git"
+  },
+
   "scripts": {
     "test": "jest",
     "lint": "eslint --cache --ext .js . || true"
   },
-  "author": "",
+  "contributors": [
+    {
+      "name": "Donald Suhr",
+      "email": "github@donsuhr.com",
+      "url": "http://www.donsuhr.com/"
+    },
+    {
+      "name": "Adam Reamer"
+    }
+  ],
   "license": "ISC",
   "devDependencies": {
     "dotenv": "^8.2.0",

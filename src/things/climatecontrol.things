@@ -1,5 +1,5 @@
 Bridge mqtt:broker:MQTTBroker [ host="mosquitto", secure=false, qos=2] {
-  Thing topic Climate_Control "Climate Control" @ "Mushroom" [availibilityTopic="climate/status"] {
+  Thing topic Climate_Control "Climate Control" @ "Mushroom" [availabilityTopic="climate/status"] {
     Channels:
       Type switch : Relay1 "Relay 1" [stateTopic="climate/relay/1/state" , commandTopic="climate/relay/1/set", on="ON", off="OFF"]
       Type switch : Relay2 "Relay 2" [stateTopic="climate/relay/2/state" , commandTopic="climate/relay/2/set", on="ON", off="OFF"]
@@ -26,8 +26,8 @@ Bridge mqtt:broker:MQTTBroker [ host="mosquitto", secure=false, qos=2] {
       Type number : ZE_Humidity "Humidity (Zone E)" [stateTopic="sht10/zone/E/humidity/state"]
       Type number : ZE_DewPoint "Dew Point (Zone E)" [stateTopic="sht10/zone/E/dewpoint/state"]
   }
-  
-  Thing topic EnviroPlus "EnviroPlus" @ "Mushroom" [availibilityTopic="climate/status"] {
+
+  Thing topic EnviroPlus "EnviroPlus" @ "Mushroom" [availabilityTopic="sht10/status"] {
     Channels:
       Type number : EnviroPlus_Temperature "Temperature" [stateTopic="home/enviroplus/state", transformationPattern="JSONPATH:$.temperature_f"]
       Type number : EnviroPlus_CPUTemperature "CPU Temperature" [stateTopic="home/enviroplus/state", transformationPattern="JSONPATH:$.cpu_temp"]
