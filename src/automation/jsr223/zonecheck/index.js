@@ -4,7 +4,7 @@
 'use strict';
 
 var logger = Java.type('org.slf4j.LoggerFactory').getLogger(
-  'org.openhab.model.script.Rules.Experiments'
+  'com.adam.zoneCheck.index          '
 );
 var Things = Java.type('org.openhab.core.model.script.actions.Things');
 var CONF_DIR = Java.type('java.lang.System').getenv('OPENHAB_CONF');

@@ -3,7 +3,7 @@
 'use strict';
 
 var logger = Java.type('org.slf4j.LoggerFactory').getLogger(
-  'org.openhab.model.script.Rules.Experiments'
+  'com.adam.zoneCheck.utils          ﳹ'
 );
 
 function attach(context) {

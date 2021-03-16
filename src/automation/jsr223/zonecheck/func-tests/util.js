@@ -3,7 +3,7 @@
 'use strict';
 
 var logger = Java.type('org.slf4j.LoggerFactory').getLogger(
-  'org.openhab.model.script.Rules.Experiments'
+  'com.adam.zoneCheck.funcTest.util  ﭧ'
 );
 var ScriptExecution = Java.type(
   'org.openhab.core.model.script.actions.ScriptExecution'
@@ -115,5 +115,7 @@ if (typeof module === 'object' && typeof module.exports === 'object') {
   context.com.adam = context.com.adam || {};
   context.com.adam.zoneCheck = context.com.adam.zoneCheck || {};
   context.com.adam.zoneCheck.funcTest = context.com.adam.zoneCheck.funcTest || {};
-  context.com.adam.zoneCheck.funcTest.util.tests = attach(context.com.adam.zoneCheck);
+  context.com.adam.zoneCheck.funcTest.util.tests = attach(
+    context.com.adam.zoneCheck
+  );
 }

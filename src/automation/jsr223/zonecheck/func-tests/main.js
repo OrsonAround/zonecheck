@@ -1,14 +1,10 @@
-/* global Java,events,OnOffType */
+/* global Java */
 
 'use strict';
 
 var logger = Java.type('org.slf4j.LoggerFactory').getLogger(
-  'org.openhab.model.script.Rules.Experiments'
+  'com.adam.zoneCheck.funcTest.main  ﭧ'
 );
-var ScriptExecution = Java.type(
-  'org.openhab.core.model.script.actions.ScriptExecution'
-);
-var ZonedDateTime = Java.type('java.time.ZonedDateTime');
 
 function attach(zoneCheck) {
   var tests = [
