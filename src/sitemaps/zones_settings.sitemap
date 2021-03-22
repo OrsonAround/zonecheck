@@ -1,0 +1,53 @@
+//https://github.com/openhab/openhab-webui/issues/765
+
+sitemap zones_settings label="Zone Check Settings" {
+    Frame label="Zone 1" {
+        Setpoint item=Z1_TargetTemp minValue=0 maxValue=100 step=0.5
+        Setpoint item=Z1_TargetHumid minValue=0 maxValue=100 step=0.5
+        Switch item=Z1_Enabled
+        Setpoint item=Z1_CycleTime minValue=180 maxValue=600 step=1
+        Switch item=Z1_MistEnabled
+        Setpoint item=Z1_MistTime minValue=60 maxValue=600 step=1
+        Switch item=Z1_FanEnabled 
+        Setpoint item=Z1_FanDelayTime minValue=5 maxValue=600 step=1
+        Setpoint item=Z1_FanTime minValue=60 maxValue=600 step=1
+    }
+    Frame label="Zone 2" {
+        Setpoint item=Z2_TargetTemp minValue=0 maxValue=100 step=0.5
+        Setpoint item=Z2_TargetHumid minValue=0 maxValue=100 step=0.5
+        Switch item=Z2_Enabled 
+        Setpoint item=Z2_CycleTime minValue=180 maxValue=600 step=0.5
+        Switch item=Z2_MistEnabled
+        Setpoint item=Z2_MistTime minValue=60 maxValue=600 step=0.5
+        Switch item=Z2_FanEnabled
+        Setpoint item=Z2_FanDelayTime minValue=5 maxValue=600 step=0.5
+        Setpoint item=Z2_FanTime minValue=60 maxValue=600 step=0.5
+    }
+    Frame label="Zone 3" {
+        Setpoint item=Z3_TargetTemp minValue=0 maxValue=100 step=0.5
+        Setpoint item=Z3_TargetHumid minValue=0 maxValue=100 step=0.5
+        Switch item=Z3_Enabled
+        Setpoint item=Z3_CycleTime minValue=180 maxValue=600 step=0.5
+        Switch item=Z3_MistEnabled
+        Setpoint item=Z3_MistTime minValue=60 maxValue=600 step=0.5
+        Switch item=Z3_FanEnabled
+        Setpoint item=Z3_FanDelayTime minValue=5 maxValue=600 step=0.5
+        Setpoint item=Z3_FanTime minValue=60 maxValue=600 step=0.5
+    }
+    Frame label="Zone 4" {
+        Setpoint item=Z4_TargetTemp minValue=0 maxValue=100 step=0.5
+        Setpoint item=Z4_TargetHumid minValue=0 maxValue=100 step=0.5
+        Switch item=Z4_Enabled
+        Setpoint item=Z4_CycleTime minValue=180 maxValue=600 step=0.5
+        Switch item=Z4_MistEnabled
+        Setpoint item=Z4_MistTime minValue=60 maxValue=600 step=0.5
+        Switch item=Z4_FanEnabled
+        Setpoint item=Z4_FanDelayTime minValue=5 maxValue=600 step=0.5
+        Setpoint item=Z4_FanTime minValue=60 maxValue=600 step=0.5
+    }
+    Frame label="Zone 5" {        
+        Setpoint item=ZA_TargetTemp minValue=0 maxValue=100 step=0.5
+        Setpoint item=ZA_TargetHumid minValue=0 maxValue=100 step=0.5
+        Switch item=ZA_Enabled
+    }
+}

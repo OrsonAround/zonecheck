@@ -1,0 +1,38 @@
+sitemap zones_status label="Zone Check Status" {
+    Frame label="All Zones" {
+        Text item=ZA_WaterPump
+        Text item=ZA_SpaceHeater       
+    }
+    Frame label="Zone 1" {
+        Text item=Z1_Temperature
+        Text item=Z1_Humidity
+        Text item=Z1_DewPoint
+        Text icon=""
+        Text item=Z1_Relay
+        Text item=Z1_FanSwitch
+    }
+        Frame label="Zone 2" {
+        Text item=Z2_Temperature
+        Text item=Z2_Humidity
+        Text item=Z2_DewPoint
+        Text icon=""
+        Text item=Z2_Relay
+        Text item=Z2_FanSwitch
+    }
+        Frame label="Zone 3" {
+        Text item=Z3_Temperature
+        Text item=Z3_Humidity
+        Text item=Z3_DewPoint
+        Text icon=""
+        Text item=Z3_Relay
+        Text item=Z3_FanSwitch
+    }
+        Frame label="Zone 4" {
+        Text item=Z4_Temperature
+        Text item=Z4_Humidity
+        Text item=Z4_DewPoint
+        Text icon=""
+        Text item=Z4_Relay
+        Text item=Z4_FanSwitch
+    }
+}

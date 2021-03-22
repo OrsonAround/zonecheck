@@ -1,0 +1,10 @@
+Strategies {
+    everyMinute : "0 * * * * ?"
+    everyHour   : "0 0 * * * ?"
+    everyDay    : "0 0 0 * * ?"
+}
+
+Items {
+    ClimateControlGroup*                : strategy = everyChange, everyHour
+    Presence_Phone                      : strategy = everyChange
+}
