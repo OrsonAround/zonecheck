@@ -1,38 +1,25 @@
 {
   "name": "zonecheck",
   "version": "1.0.0",
-  "description": "openhab project to control zone humidity",
-  "main": "src/automation/jsr223/zonecheck/index.js",
-    "repository": {
-    "type": "git",
-    "url": "git://github.com/donsuhr/zonecheck.git"
-  },
-
-  "scripts": {
-    "test": "jest",
-    "lint": "eslint --cache --ext .js . || true"
-  },
-  "contributors": [
-    {
-      "name": "Donald Suhr",
-      "email": "github@donsuhr.com",
-      "url": "http://www.donsuhr.com/"
-    },
-    {
-      "name": "Adam Reamer"
-    }
-  ],
-  "license": "ISC",
-  "devDependencies": {
-    "dotenv": "^8.2.0",
-    "eslint": "^7.20.0",
-    "eslint-config-airbnb-base": "^14.2.1",
-    "eslint-plugin-eslint-comments": "^3.2.0",
-    "eslint-plugin-import": "^2.22.1",
-    "glob": "^7.1.6",
-    "jest": "^26.6.3",
-    "lodash": "^4.17.21",
+  "description": "",
+  "main": "rules.js",
+  "dependencies": {
     "prettier": "^2.2.1"
   },
-  "dependencies": {}
+  "devDependencies": {
+    "eslint": "^7.22.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OrsonAround/zonecheck.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/OrsonAround/zonecheck/issues"
+  },
+  "homepage": "https://github.com/OrsonAround/zonecheck#readme"
 }
