@@ -13,7 +13,7 @@ var sRule = new SimpleRule({
 });
 sRule.name = 'Zone Check';
 sRule.setTriggers([
-  // Trigger once per minute
+  // Trigger once every 5 seconds
   TriggerBuilder.create()
     .withId('aTimerTrigger')
     .withTypeUID('timer.GenericCronTrigger')

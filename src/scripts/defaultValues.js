@@ -1,23 +1,38 @@
-logger.warn('Resetting all Climate Control settings to default values.');
-logger.warn('All Zones will be Disabled');
-var items = itemRegistry.getItemsByTag('Settings');
-var ii = items.length;
-for (var i = 0; i < ii; i += 1) {
-  if (items[i].getName().indexOf('DesiredTemp') >= 0) {
-    events.postUpdate(items[i].getName(), '74');
-  } else if (items[i].getName().indexOf('DesiredHumid') >= 0) {
-    events.postUpdate(items[i].getName(), '90');
-  } else if (items[i].getName().indexOf('Enabled') >= 0) {
-    events.postUpdate(items[i].getName(), OnOffType.OFF);
-  } else if (items[i].getName().indexOf('Time') >= 0) {
-    events.postUpdate(items[i].getName(), '60');
-  } else if (items[i].getName().indexOf('CycleTime') >= 0) {
-    events.postUpdate(items[i].getName(), '600');
-  } else if (items[i].getName().indexOf('MaxTemp') >= 0) {
-    events.postUpdate(items[i].getName(), '80');
-  } else if (items[i].getName().indexOf('MinTemp') >= 0) {
-    events.postUpdate(items[i].getName(), '70');
-  } else {
-    logger.warn('Unrecognized Settings Item: ' + items[i].getName());
-  }
-}
+context.setDefaultItemValues = function setDefaultItemValues(
+  overwrite,
+  zonesEnabled
+) {
+  var items = ir.getItemsByTag('Settings');
+  items.forEach(function (item) {
+    var name = item.getName();
+    if (name.indexOf('_TargetTemp') >= 0 || overwrite) {
+      events.postUpdate(name, '74');
+    } else if (name.indexOf('_TargetHumid' || overwrite) >= 0) {
+      events.postUpdate(name, '90');
+    } else if (name.indexOf('_Enabled' || overwrite) >= 0) {
+      if (zonesEnabled) {
+        events.postUpdate(name, OnOffType.ON);
+      } else {
+        events.postUpdate(name, OnOffType.OFF);
+      }
+    } else if (name.indexOf('_FanCycleTime' || overwrite) >= 0) {
+      events.postUpdate(name, '10');
+    } else if (name.indexOf('_FanTime' || overwrite) >= 0) {
+      events.postUpdate(name, '10');
+    } else if (name.indexOf('_DelayTime' || overwrite) >= 0) {
+      events.postUpdate(name, '10');
+    } else if (name.indexOf('_MistCycleTime' || overwrite) >= 0) {
+      events.postUpdate(name, '10');
+    } else if (name.indexOf('_MistTime') >= 0 || overwrite) {
+      events.postUpdate(name, '10');
+    } else if (name.indexOf('_CycleTime') >= 0 || overwrite) {
+      events.postUpdate(name, '120');
+    } else if (name.indexOf('_MaxTemp') >= 0 || overwrite) {
+      events.postUpdate(name, '80');
+    } else if (name.indexOf('_MinTemp') >= 0 || overwrite) {
+      events.postUpdate(name, '70');
+    } else {
+      logger.warn('Unrecognized Settings Item: ' + name);
+    }
+  });
+};
