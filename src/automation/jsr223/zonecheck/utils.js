@@ -1,10 +1,14 @@
 'use strict';
 
+load(
+  Java.type('java.lang.System').getenv('OPENHAB_CONF') +
+    '/automation/lib/javascript/core/metadata.js'
+);
+
 var masterGroup = 'Zones';
 
 var Duration = Java.type('java.time.Duration');
 var ZonedDateTime = Java.type('java.time.ZonedDateTime');
-var uuid = Java.type('java.util.UUID');
 
 var logger = Java.type('org.slf4j.LoggerFactory').getLogger(
   'com.openhab.core.model.script.rule.zonecheck'
@@ -26,37 +30,29 @@ scriptExtension.importPreset('default'); // ?
 
   context.PersistenceExtensions = PersistenceExtensions;
   context.pe = PersistenceExtensions;
-  context.uuid = uuid.randomUUID();
-  context.zoneBanner = '* * * * *     Zone {}     * * * * *            ';  
 
-  context.logInfo = function (type, value) {
-    logger.info(args(arguments));
-  };
-  context.logWarn = function (type, value) {
-    logger.warn(args(arguments));
-  };
-  context.logDebug = function (type, value) {
-    logger.debug(args(arguments));
-  };
-  context.logError = function (type, value) {
-    logger.error(args(arguments));
-  };
-  context.logTrace = function (type, value) {
-    logger.trace(args(arguments));
-  };
+  context.zoneBanner = '* * * * *     Zone {}     * * * * *            ';
 
   context.startup = function startUp() {
-    //
-    context.setDefaultItemValues(false, false);
+    
+    //context.setDefaultItemValues(true, true);
     //context.systemCheck();
-    context.timers = context.timers || {}; 
-    context.getZones().forEach(function each(zone) {
+
+    context.counters = context.counters || {};  
+    context.timers = context.timers || {};
+    context.getZones().forEach(function each(zone) { 
       var zoneName = zone.getName();
       context.timers[zoneName] = context.timers[zoneName] || {};
+      context.counters[zoneName] = context.counters[zoneName] || {};
     });
-  }
 
-  // TODO Take zone as an argument, re-enable zones if devices/sensors return
+    // logger.info(context.get_metadata(zoneName, 'stateDescription'));
+    //var map = new Map();
+    //map.set('pattern', '%s');
+    // logger.info(context.set_metadata(zoneName, 'stateDescription', map, 'Errored', true));
+  };
+
+  // TODO  re-enable ERRORED zones if devices/sensors return
   context.systemCheck = function systemCheck() {
     logger.info('* * * * *  SYSTEM CHECK   * * * * *');
     context.getZones().forEach(function each(zone) {
@@ -106,26 +102,12 @@ scriptExtension.importPreset('default'); // ?
     return items;
   };
 
-  context.timeRemaining = function timeRemaining(timer) {
-    if (timer.isActive()) {
-      var executionTime =
-              timer.getExecutionTime() || ZonedDateTime.now();
-      var timeRemaining = Duration.between(
-        ZonedDateTime.now(),
-        executionTime
-      );
-      return timeRemaining;
-    } else {
-      return 0; // TODO this should probably be a duration of 0 or .getSeconds will fail 
-    }
-  };
-
   context.onZoneDisabled = function onZoneDisabled(zone) {
     try {
       var items = zone.members;
       items.forEach(function each(item) {
         logger.info(item.getName());
-        // TODO Don't touch Zone ZA Devices unless it's zone ZA that's been disabled
+        // TODO Don't touch Zone ZA items unless it's zone ZA that's been disabled
         if (item.getType() === 'Switch' && !item.hasOwnProperty('ZA')) {
           logger.info(
             'Zone {} disabled. Turning off {}',
@@ -146,10 +128,10 @@ scriptExtension.importPreset('default'); // ?
       var off =
         relay.getState() === OnOffType.OFF || relay.getState() == 'NULL';
       if (!off) {
-        logDebug(relay.getName() + ' is ON, leaving the pump ON');
+        logger.info(relay.getName() + ' is ON, leaving the pump ON');
         return false;
       } else {
-        logDebug(relay.getName() + ' is OFF ');
+        logger.info(relay.getName() + ' is OFF ');
       }
     });
     return true;
@@ -179,6 +161,7 @@ scriptExtension.importPreset('default'); // ?
     }
   };
 
+  // BROKEN + it will overwrite 0 values?
   context.setDefaultItemValues = function setDefaultItemValues(
     overwrite,
     zonesEnabled
@@ -186,32 +169,32 @@ scriptExtension.importPreset('default'); // ?
     var items = ir.getItemsByTag('Settings');
     items.forEach(function (item) {
       var name = item.getName();
-      var state = item.getState();
-      if (overwrite || !state && name.indexOf('_TargetTemp') >= 0) {
+      //var state = item.getState();
+      if (overwrite || (!item.getState() && name.indexOf('_TargetTemp') >= 0)) {
         events.postUpdate(name, '74');
-      } else if (overwrite || !state && name.indexOf('_TargetHumid') >= 0) {
+      } else if (overwrite || (!item.getState() && name.indexOf('_TargetHumid') >= 0)) {
         events.postUpdate(name, '90');
-      } else if (overwrite || !state && name.indexOf('Enabled') >= 0) {
-        if (overwrite || !state && zonesEnabled) {
+      } else if (overwrite || (!item.getState() && name.indexOf('Enabled') >= 0)) {
+        if (overwrite || (!item.getState() && zonesEnabled)) {
           events.postUpdate(name, OnOffType.ON);
         } else {
           events.postUpdate(name, OnOffType.OFF);
         }
-      } else if (overwrite || !state && name.indexOf('_FanCycleTime') >= 0) {
+      } else if (overwrite || (!item.getState() && name.indexOf('_FanCycleTime') >= 0)) {
         events.postUpdate(name, '10');
-      } else if (overwrite || !state && name.indexOf('_FanTime') >= 0) {
+      } else if (overwrite || (!item.getState() && name.indexOf('_FanTime') >= 0)) {
         events.postUpdate(name, '10');
-      } else if (overwrite || !state && name.indexOf('DelayTime') >= 0) {
+      } else if (overwrite || (!item.getState() && name.indexOf('DelayTime') >= 0)) {
         events.postUpdate(name, '10');
-      } else if (overwrite || !state && name.indexOf('_MistCycleTime') >= 0) {
+      } else if (overwrite || (!item.getState() && name.indexOf('_MistCycleTime') >= 0)) {
         events.postUpdate(name, '10');
-      } else if (overwrite || !state && name.indexOf('_MistTime') >= 0) {
+      } else if (overwrite || (!item.getState() && name.indexOf('_MistTime') >= 0)) {
         events.postUpdate(name, '10');
-      } else if (overwrite || !state && name.indexOf('_CycleTime') >= 0) {
+      } else if (overwrite || (!item.getState() && name.indexOf('_CycleTime') >= 0)) {
         events.postUpdate(name, '120');
-      } else if (overwrite || !state && name.indexOf('_MaxTemp') >= 0) {
+      } else if (overwrite || (!item.getState() && name.indexOf('_MaxTemp') >= 0)) {
         events.postUpdate(name, '80');
-      } else if (overwrite || !state && name.indexOf('_MinTemp') >= 0) {
+      } else if (overwrite || (!item.getState() && name.indexOf('_MinTemp') >= 0)) {
         events.postUpdate(name, '70');
       } else {
         //logger.warn('Unrecognized Settings Item: ' + name);

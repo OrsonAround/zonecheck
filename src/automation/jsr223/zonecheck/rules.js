@@ -3,6 +3,9 @@
 var CONF_DIR = Java.type('java.lang.System').getenv('OPENHAB_CONF');
 load(CONF_DIR + '/automation/jsr223/zonecheck/utils.js');
 load(CONF_DIR + '/automation/jsr223/zonecheck/actions.js');
+load(CONF_DIR + '/automation/jsr223/zonecheck/temperature.js');
+load(CONF_DIR + '/automation/jsr223/zonecheck/humidity.js');
+load(CONF_DIR + '/automation/jsr223/zonecheck/timers.js');
 
 // TODO Change these to use RuleBuilder
 // Rule for runCycle()

@@ -4,14 +4,15 @@ String Z_Trigger "Z_Trigger (for REST API Trigger Rule)"
 Group Zones "Zones" // Should only contain groups.
 
 // All Zones
-Group:Switch:OR(ON,OFF) ZA "All Zones" (Zones) ["Zone"] // Zones can be named anything, but require a "Zone" tag.
+Group:Switch:OR(ON,OFF) ZA "All Zones" (Zones) ["Zone"] {stateDescription="" [pattern="%s", options="Enabled, Disabled, Errored"]} 
 Group ZA_Settings "Settings" <text> (ZA)
 Switch ZA_Enabled "Enabled [%s]" <switch> (ZA_Settings)  ["Settings"] // Each Zone requires an '_Enabled' Switch Item. 
 Number:Temperature ZA_TargetTemp "Target Temperature [%.2f °F]" <temperature> (ZA_Settings) ["Settings"]
+Number:Temperature ZA_TargetHumid "Target Humidity [%.2f °F]" <temperature> (ZA_Settings) ["Settings"]
 Number:Temperature ZA_MaxTemp "Maximum Temperature [%.2f °F]" <temperature_hot> (ZA_Settings) ["Settings"]
 Number:Temperature ZA_MinTemp "Minimum Temperature [%.2f °F]" <temperature_cold> (ZA_Settings) ["Settings"]
 
-Switch ZA_SpaceHeater "Space Heater" <switch> (Z1, Z2, Z3, Z4, Z5, ZA) ["Devices", "Heater"] {channel="zigbee:device:81b451f743:086bd7fffe470def:086BD7FFFE470DEF_1_switch", autoupdate="false"}
+Switch ZA_SpaceHeater "Space Heater" <switch> (Z1, Z2, Z3, Z4, Z5, ZA) ["Devices", "Heating"] {channel="zigbee:device:81b451f743:086bd7fffe470def:086BD7FFFE470DEF_1_switch", autoupdate="false"}
 Switch ZA_WaterPump "Water Pump" <switch> (Z1, Z2, Z3, Z4, Z5, ZA) ["Devices", "Pump"] {channel="zigbee:device:81b451f743:60a423fffe98d376:60A423FFFE98D376_1_switch", autoupdate="false"}
 
 Number:Temperature ZA_Temperature "Temperature [%.2f °F]" <temperature> (ZA_Values) ["Sensor", "Temperature", "Required"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Z5_Temperature"} 
@@ -19,7 +20,7 @@ Number:Dimensionless ZA_Humidity "Humidity [%.2f %%]" <humidity> (ZA_Values) ["S
 Number:Temperature ZA_DewPoint "Dew Point [%.2f °F]" <temperature> (ZA_Values) ["Sensor", "Required"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Z5_DewPoint"} 
 
 // Zone 1
-Group:Switch:OR(ON,OFF) Z1 "Zone 1" (Zones) ["Zone"] {zoneConfig="Default"[enabled=true, fans=true, mist=true, heat=false]}
+Group:Switch:OR(ON,OFF) Z1 "Zone 1" (Zones) ["Zone"] {stateDescription="" [pattern="%s", options="Enabled, Disabled, Errored"]} // Zones can be named anything, but require a "Zone" tag.
 Group Z1_Settings "Settings" <text> (Z1)
 Group Z1_Values "Values" <line> (Z1)
 Switch Z1_Enabled "Enabled [%s]" <switch> (Z1_Settings) ["Settings"]
@@ -44,7 +45,7 @@ Number:Dimensionless Z1_Humidity "Humidity [%.2f %%]" <humidity> (Z1_Values) ["S
 Number:Temperature Z1_DewPoint "Dew Point [%.2f °F]" <temperature> (Z1_Values) ["Sensor", "Required"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Z1_DewPoint"} 
 
 // Zone 2
-Group:Switch:OR(ON,OFF) Z2 "Zone 2" (Zones) ["Zone"]
+Group:Switch:OR(ON,OFF) Z2 "Zone 2" (Zones) ["Zone"] {stateDescription="" [pattern="%s", options="Enabled, Disabled, Errored"]}
 Group Z2_Settings "Settings" <text> (Z2)
 Group Z2_Values "Values" <line> (Z2)
 Switch Z2_Enabled "Enabled [%s]" <switch> (Z2_Settings) ["Settings"]
@@ -69,7 +70,7 @@ Number:Dimensionless Z2_Humidity "Humidity [%.2f %%]" <humidity> (Z2_Values) ["S
 Number:Temperature Z2_DewPoint "Dew Point [%.2f °F]" <temperature> (Z2_Values) ["Sensor", "Required"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Z2_DewPoint"} 
 
 // Zone 3
-Group:Switch:OR(ON,OFF) Z3 "Zone 3" (Zones) ["Zone"]
+Group:Switch:OR(ON,OFF) Z3 "Zone 3" (Zones) ["Zone"] {stateDescription="" [pattern="%s", options="Enabled, Disabled, Errored"]}
 Group Z3_Settings "Settings" <text> (Z3)
 Group Z3_Values "Values" <line> (Z3)
 Switch Z3_Enabled "Enabled [%s]" <switch> (Z3_Settings) ["Settings"]
@@ -90,12 +91,12 @@ Switch Z3_Relay "Relay 9 [%s]" <switch> (Z3) ["Relay", "Devices"] {channel="mqtt
 Switch Z3_FanSwitch "Fan Switch [%s]" <switch> (Z3) ["Fan", "Devices"] {channel="zigbee:device:81b451f743:60a423fffe98d318:60A423FFFE98D318_1_switch"} 
 
 // THIS IS OFFSET ===>
-Number:Temperature Z3_Temperature "Temperature [%.2f °F]" <temperature> (Z3_Values) ["Sensor", "Offset"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Z3_Temperature" [profile="system:offset", offset="1.1933333"]}
+Number:Temperature Z3_Temperature "Temperature [%.2f °F]" <temperature> (Z3_Values) ["Sensor", "Offset"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Z3_Temperature" [profile="system:offset", offset="1.19"]}
 Number:Dimensionless Z3_Humidity "Humidity [%.2f %%]" <humidity> (Z3_Values) ["Sensor"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Z3_Humidity" [profile="system:offset", offset="-3.84"]}
 Number:Temperature Z3_DewPoint "Dew Point [%.2f °F]" <temperature> (Z3_Values) ["Sensor", "Required"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Z3_DewPoint"} 
 
 // Zone 4
-Group:Switch:OR(ON,OFF) Z4 "Zone 4" (Zones) ["Zone"]
+Group:Switch:OR(ON,OFF) Z4 "Zone 4" (Zones) ["Zone"] {stateDescription="" [pattern="%s", options="Enabled, Disabled, Errored"]}
 Group Z4_Settings "Settings" <text> (Z4)
 Group Z4_Values "Values" <line> (Z4) 
 Switch Z4_Enabled "Enabled [%s]" <switch> (Z4_Settings) ["Settings"]
@@ -120,7 +121,7 @@ Number:Dimensionless Z4_Humidity "Humidity [%.2f %%]" <humidity> (Z4_Values) ["S
 Number:Temperature Z4_DewPoint "Dew Point [%.2f °F]" <temperature> (Z4_Values) ["Sensor", "Required"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Z4_DewPoint"} 
 
 // Zone 5
-Group:Switch:OR(ON,OFF) Z5 "Zone 4" (Zones) ["Zone"]
+Group:Switch:OR(ON,OFF) Z5 "Zone 4" (Zones) ["Zone"] {stateDescription="" [pattern="%s", options="Enabled, Disabled, Errored"]}
 Group Z5_Settings "Settings" <text> (Z5)
 Group Z5_Values "Values" <line> (Z5) 
 Switch Z5_Enabled "Enabled [%s]" <switch> (Z5_Settings) ["Settings"]
@@ -132,6 +133,7 @@ Number:Temperature Z5_Temperature "Temperature [%.2f °F]" <temperature> (Z5_Val
 Number:Dimensionless Z5_Humidity "Humidity [%.2f %%]" <humidity> (Z5_Values) ["Sensor", "Humidity", "Required"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Z5_Humidity"} 
 Number:Temperature Z5_DewPoint "Dew Point [%.2f °F]" <temperature> (Z5_Values) ["Sensor", "Required"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Z5_DewPoint"} 
 
+/* 
 // EnviroPlus
 Group EnviroPlus "EnviroPlus"
 Number:Temperature EnviroPlus_Temperature "Temperature [%.2f °F]" <temperature> (EnviroPlus) {channel="mqtt:topic:MQTTBroker:EnviroPlus:EnviroPlus_Temperature"} 
@@ -147,3 +149,4 @@ Number EnviroPlus_Oxidised "Oxidised" <gas> {channel="mqtt:topic:MQTTBroker:Envi
 Number EnviroPlus_Reduced "Reduced" <gas> {channel="mqtt:topic:MQTTBroker:EnviroPlus:EnviroPlus_Reduced"} 
 Number EnviroPlus_NH3 "NH3" <gas> {channel="mqtt:topic:MQTTBroker:EnviroPlus:EnviroPlus_NH3"} 
 Number:LuminousFlux EnviroPlus_LUX "LUX [%.2f Lux]" <light> {channel="mqtt:topic:MQTTBroker:EnviroPlus:EnviroPlus_LUX"} 
+*/
