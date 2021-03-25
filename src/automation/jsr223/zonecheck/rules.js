@@ -7,7 +7,6 @@ load(CONF_DIR + '/automation/jsr223/zonecheck/temperature.js');
 load(CONF_DIR + '/automation/jsr223/zonecheck/humidity.js');
 load(CONF_DIR + '/automation/jsr223/zonecheck/timers.js');
 
-// TODO Change these to use RuleBuilder
 // Rule for runCycle()
 var sRule = new SimpleRule({
   execute: function execute(module, input) {

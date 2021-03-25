@@ -3,6 +3,7 @@ dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 exclude="${dir}/rsync-exclude.txt"
 src="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../src" && pwd )/"
 dest="/etc/openhab"
+touch "${src}automation/jsr223/zonecheck/actions.js"
 touch "${src}automation/jsr223/zonecheck/rules.js"
 rsync --archive --verbose --progress --stats --exclude-from=${exclude} $src $dest
 sleep 3

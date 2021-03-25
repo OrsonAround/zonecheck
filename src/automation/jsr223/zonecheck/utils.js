@@ -31,33 +31,17 @@ scriptExtension.importPreset('default'); // ?
   context.PersistenceExtensions = PersistenceExtensions;
   context.pe = PersistenceExtensions;
 
-  context.zoneBanner = '* * * * *     Zone {}     * * * * *            ';
+  context.zoneBanner = '* * * * *     Zone {}     * * * * *';
 
-  context.startup = function startUp() {
-    
-    //context.setDefaultItemValues(true, true);
-    //context.systemCheck();
-
-    context.counters = context.counters || {};  
-    context.timers = context.timers || {};
-    context.getZones().forEach(function each(zone) { 
-      var zoneName = zone.getName();
-      context.timers[zoneName] = context.timers[zoneName] || {};
-      context.counters[zoneName] = context.counters[zoneName] || {};
-    });
-
-    // logger.info(context.get_metadata(zoneName, 'stateDescription'));
-    //var map = new Map();
-    //map.set('pattern', '%s');
-    // logger.info(context.set_metadata(zoneName, 'stateDescription', map, 'Errored', true));
-  };
-
-  // TODO  re-enable ERRORED zones if devices/sensors return
+  // TODO  re-enable ERRORED zones if devices/sensors return, metadata not tested
+  // TODO  Currently only checks for recent sensor data, add check for device states
   context.systemCheck = function systemCheck() {
-    logger.info('* * * * *  SYSTEM CHECK   * * * * *');
-    context.getZones().forEach(function each(zone) {
+    logger.info('* * * * *  SYSTEM CHECK   * * * * *');                
+    context.getZones(true).forEach(function each(zone) {
+      var zoneName = zone.getName();
       zone.allMembers.forEach(function (member) {
         var tags = member.getTags();
+        var itemState = member.getState();
         if (tags.contains('Required') && tags.contains('Sensor')) {
           var passed =
             context.pe.updatedSince(
@@ -67,15 +51,24 @@ scriptExtension.importPreset('default'); // ?
             context.pe.changedSince(
               member,
               ZonedDateTime.now().minusMinutes(5)
-            );
+            ) &&
+            itemState !== UNDEF &&
+            itemState !== null;
           if (!passed) {
             logger.warn(
               'FAILED: {} has not changed or updated in the last 5 minutes.',
               member.getName()
             );
             if (zone.getState() === OnOffType.ON) {
-              events.sendCommand(zone.getName() + '_Enabled', OnOffType.OFF);
-              logger.warn('Zone {} disabled.', zone.getName());
+              events.sendCommand(zoneName + '_Enabled', OnOffType.OFF);
+              context.set_metadata(
+                zoneName,
+                'stateDescription',
+                null,
+                'Errored',
+                false
+              );
+              logger.warn('Zone {} disabled.', zoneName);
             }
           }
         }
@@ -84,13 +77,44 @@ scriptExtension.importPreset('default'); // ?
     return true;
   };
 
-  context.getZones = function getZones() {
+  // Not tested
+  context.checkSensors = function checkSensors(zone) {
+    zone.allMembers.forEach(function (member) {
+      var tags = member.getTags();
+      var itemState = member.getState();
+      if (tags.contains('Required') && tags.contains('Sensor')) {
+        var passed =
+          context.pe.updatedSince(
+            member,
+            ZonedDateTime.now().minusMinutes(5)
+          ) &&
+          context.pe.changedSince(
+            member,
+            ZonedDateTime.now().minusMinutes(5)
+          ) &&
+          itemState !== UNDEF &&
+          itemState !== null;
+      }
+      if (!passed) {
+        return false;
+      }
+    });
+    return true;
+  };
+
+  context.checkHardware = function checkHardware(zone) {};
+
+  context.getZones = function getZones(enabled) {
     var zones = ir.getItem(masterGroup).getMembers(function (z) {
-      return (
-        z.getType() === 'Group' &&
-        z.hasTag('Zone') &&
-        ir.getItem(z.getName() + '_Enabled').getState() === OnOffType.ON
-      );
+      if (enabled) {
+        return (
+          z.getType() === 'Group' &&
+          z.hasTag('Zone') &&
+          ir.getItem(z.getName() + '_Enabled').getState() === OnOffType.ON
+        );
+      } else {
+        return z.getType() === 'Group' && z.hasTag('Zone');
+      }
     });
     return zones;
   };
@@ -128,73 +152,58 @@ scriptExtension.importPreset('default'); // ?
       var off =
         relay.getState() === OnOffType.OFF || relay.getState() == 'NULL';
       if (!off) {
-        logger.info(relay.getName() + ' is ON, leaving the pump ON');
+        logger.debug(relay.getName() + ' is ON, leaving the pump ON');
         return false;
       } else {
-        logger.info(relay.getName() + ' is OFF ');
+        logger.debug(relay.getName() + ' is OFF ');
       }
     });
     return true;
   };
 
-  context.relay = function relay(master, slave, state) {
-    if (state === OnOffType.ON) {
-    }
-  };
-
-  context.getPump = function getPump() {
-    try {
-      return ir.getItem('ZA_WaterPump');
-    } catch (e) {
-      logger.error('ZA_WaterPump not found in registry');
-    }
-    return undefined;
-  };
-
   context.checkPump = function checkPump() {
-    var pumpSwitch = context.getPump();
+    var pumpSwitch = ir.getItem('ZA_WaterPump');
     if (pumpSwitch.getState() === OnOffType.ON && context.allRelaysAreOff()) {
       events.sendCommand(pumpSwitch, OnOffType.OFF);
       logger.info('Pump Check: Turning off Water Pump');
-    } else {
-      logger.info('Pump Check: The water pump is OFF');
-    }
+    } 
   };
 
-  // BROKEN + it will overwrite 0 values?
+  // BROKEN + it will overwrite 0 values
   context.setDefaultItemValues = function setDefaultItemValues(
-    overwrite,
-    zonesEnabled
+    zonesEnabled,
+    overwrite
   ) {
     var items = ir.getItemsByTag('Settings');
     items.forEach(function (item) {
       var name = item.getName();
-      //var state = item.getState();
-      if (overwrite || (!item.getState() && name.indexOf('_TargetTemp') >= 0)) {
-        events.postUpdate(name, '74');
-      } else if (overwrite || (!item.getState() && name.indexOf('_TargetHumid') >= 0)) {
+      var state = item.getState();
+      //logger.info('Item {} State {}', name, state);
+      if (name.indexOf('_TargetTemp') >= 0 && (!state || overwrite)) {
+        events.postUpdate(name, '78');
+      } else if (name.indexOf('_TargetHumid') >= 0 && (!state || overwrite)) {
         events.postUpdate(name, '90');
-      } else if (overwrite || (!item.getState() && name.indexOf('Enabled') >= 0)) {
-        if (overwrite || (!item.getState() && zonesEnabled)) {
+      } else if (name.indexOf('Enabled') >= 0 && (!state || overwrite)) {
+        if (zonesEnabled) {
           events.postUpdate(name, OnOffType.ON);
         } else {
           events.postUpdate(name, OnOffType.OFF);
         }
-      } else if (overwrite || (!item.getState() && name.indexOf('_FanCycleTime') >= 0)) {
+      } else if (name.indexOf('_FanCycleTime') >= 0 && (!state || overwrite)) {
         events.postUpdate(name, '10');
-      } else if (overwrite || (!item.getState() && name.indexOf('_FanTime') >= 0)) {
-        events.postUpdate(name, '10');
-      } else if (overwrite || (!item.getState() && name.indexOf('DelayTime') >= 0)) {
-        events.postUpdate(name, '10');
-      } else if (overwrite || (!item.getState() && name.indexOf('_MistCycleTime') >= 0)) {
-        events.postUpdate(name, '10');
-      } else if (overwrite || (!item.getState() && name.indexOf('_MistTime') >= 0)) {
-        events.postUpdate(name, '10');
-      } else if (overwrite || (!item.getState() && name.indexOf('_CycleTime') >= 0)) {
+      } else if (name.indexOf('_FanTime') >= 0 && (!state || overwrite)) {
         events.postUpdate(name, '120');
-      } else if (overwrite || (!item.getState() && name.indexOf('_MaxTemp') >= 0)) {
+      } else if (name.indexOf('DelayTime') >= 0 && (!state || overwrite)) {
+        events.postUpdate(name, '10');
+      } else if (name.indexOf('_MistCycleTime') >= 0 && (!state || overwrite)) {
+        events.postUpdate(name, '30');
+      } else if (name.indexOf('_MistTime') >= 0 && (!state || overwrite)) {
+        events.postUpdate(name, '30');
+      } else if (name.indexOf('_CycleTime') >= 0 && (!state || overwrite)) {
+        events.postUpdate(name, '300');
+      } else if (name.indexOf('_MaxTemp') >= 0 && (!state || overwrite)) {
         events.postUpdate(name, '80');
-      } else if (overwrite || (!item.getState() && name.indexOf('_MinTemp') >= 0)) {
+      } else if (name.indexOf('_MinTemp') >= 0 && (!state || overwrite)) {
         events.postUpdate(name, '70');
       } else {
         //logger.warn('Unrecognized Settings Item: ' + name);
@@ -202,22 +211,6 @@ scriptExtension.importPreset('default'); // ?
     });
   };
 
-  // Local Functions
-
-  var args = function (a) {
-    var um = a.length > 1 ? '\n' : '';
-    var s1 = '';
-    for (var i in a) {
-      if (i == 0) {
-        s1 = '|' + a[i] + '| ';
-      } else {
-        s1 += um + i + ":'" + a[i] + "' ";
-      }
-    }
-    return s1 + um;
-  };
-
-  // Not used
   //Boolean updatedSince(Item item, AbstractInstant timestamp)
   //Boolean updatedSince(Item item, AbstractInstant timestamp, String serviceId)
   context.updatedSince = function (it, timestamp, serviceId) {
@@ -241,23 +234,5 @@ scriptExtension.importPreset('default'); // ?
       context.logError('getItem ' + __LINE__, err);
     }
     return null;
-  };
-
-  /**
-   * Filters the members of the passed in group and generates a comma separated list of
-   * the item names (based on metadata if available).
-   * @param {string} groupName name of the group to generate the list of names from
-   * @param {function} filterFunc filtering function that takes one Item as an argument
-   */
-  context.getNames = function (groupName, filterFunc) {
-    var Collectors = Java.type('java.util.stream.Collectors');
-    return context.ir
-      .getItem(groupName)
-      .members.stream()
-      .filter(filterFunc)
-      .map(function (i) {
-        return context.getName(i.name);
-      })
-      .collect(Collectors.joining(', '));
   };
 })(this);

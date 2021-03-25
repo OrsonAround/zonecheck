@@ -1,32 +1,26 @@
 sitemap zones label="Zone Check" {
     Frame label="Zone A" {
-        Chart item=ZA_Temperature period=D legend=true
-        Text item=ZA_Temperature
-        Chart item=ZA_Humidity period=D legend=true
-        Chart item=ZA_DewPoint period=D legend=true
+        Chart item=Z1_Temperature period=D legend=true
+        Text item=Z1_Temperature
+        Chart item=Z1_Humidity period=D legend=true
+        Chart item=Z1_DewPoint period=D legend=true
     }
     Frame label="Zone B" {
-        Chart item=ZB_Temperature period=D legend=true
-        Text item=ZB_Temperature
-        Chart item=ZB_Humidity period=D legend=true
-        Chart item=ZB_DewPoint period=D legend=true
+        Chart item=Z2_Temperature period=D legend=true
+        Text item=Z2_Temperature
+        Chart item=Z2_Humidity period=D legend=true
+        Chart item=Z2_DewPoint period=D legend=true
     }
     Frame label="Zone C" {
-        Chart item=ZC_Temperature period=D legend=true
-        Text item=ZC_Temperature
-        Chart item=ZC_Humidity period=D legend=true
-        Chart item=ZC_DewPoint period=D legend=true
+        Chart item=Z3_Temperature period=D legend=true
+        Text item=Z3_Temperature
+        Chart item=Z3_Humidity period=D legend=true
+        Chart item=Z3_DewPoint period=D legend=true
     }
     Frame label="Zone D" {
-        Chart item=ZD_Temperature period=D legend=true
-        Text item=ZD_Temperature
-        Chart item=ZD_Humidity period=D legend=true
-        Chart item=ZD_DewPoint period=D legend=true
-    }
-    Frame label="Zone E" {
-        Chart item=ZE_Temperature period=D legend=true
-        Text item=ZE_Temperature
-        Chart item=ZE_Humidity period=D legend=true
-        Chart item=ZE_DewPoint period=D legend=true
+        Chart item=Z4_Temperature period=D legend=true
+        Text item=Z4_Temperature
+        Chart item=Z4_Humidity period=D legend=true
+        Chart item=Z4_DewPoint period=D legend=true
     }
 }

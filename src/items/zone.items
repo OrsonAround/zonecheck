@@ -91,7 +91,7 @@ Switch Z3_Relay "Relay 9 [%s]" <switch> (Z3) ["Relay", "Devices"] {channel="mqtt
 Switch Z3_FanSwitch "Fan Switch [%s]" <switch> (Z3) ["Fan", "Devices"] {channel="zigbee:device:81b451f743:60a423fffe98d318:60A423FFFE98D318_1_switch"} 
 
 // THIS IS OFFSET ===>
-Number:Temperature Z3_Temperature "Temperature [%.2f °F]" <temperature> (Z3_Values) ["Sensor", "Offset"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Z3_Temperature" [profile="system:offset", offset="1.19"]}
+Number:Temperature Z3_Temperature "Temperature [%.2f °F]" <temperature> (Z3_Values) ["Sensor", "Offset"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Z3_Temperature" [profile="system:offset", offset="1.79"]}
 Number:Dimensionless Z3_Humidity "Humidity [%.2f %%]" <humidity> (Z3_Values) ["Sensor"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Z3_Humidity" [profile="system:offset", offset="-3.84"]}
 Number:Temperature Z3_DewPoint "Dew Point [%.2f °F]" <temperature> (Z3_Values) ["Sensor", "Required"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Z3_DewPoint"} 
 
@@ -119,19 +119,6 @@ Switch Z4_FanSwitch "Fan Switch [%s]" <switch> (Z4) ["Fan", "Devices"] {channel=
 Number:Temperature Z4_Temperature "Temperature [%.2f °F]" <temperature> (Z4_Values) ["Sensor", "Temperature", "Required"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Z4_Temperature"} 
 Number:Dimensionless Z4_Humidity "Humidity [%.2f %%]" <humidity> (Z4_Values) ["Sensor", "Humidity", "Required"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Z4_Humidity"} 
 Number:Temperature Z4_DewPoint "Dew Point [%.2f °F]" <temperature> (Z4_Values) ["Sensor", "Required"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Z4_DewPoint"} 
-
-// Zone 5
-Group:Switch:OR(ON,OFF) Z5 "Zone 4" (Zones) ["Zone"] {stateDescription="" [pattern="%s", options="Enabled, Disabled, Errored"]}
-Group Z5_Settings "Settings" <text> (Z5)
-Group Z5_Values "Values" <line> (Z5) 
-Switch Z5_Enabled "Enabled [%s]" <switch> (Z5_Settings) ["Settings"]
-Number:Temperature Z5_TargetTemp "Target Temperature [%.2f °F]" <temperature> (Z5_Settings) ["Settings"]
-Number:Temperature Z5_MaxTemp "Maximum Temperature [%.2f °F]" <temperature_hot> (Z5_Settings) ["Settings"]
-Number:Temperature Z5_MinTemp "Minimum Temperature [%.2f °F]" <temperature_cold> (Z5_Settings) ["Settings"]
-
-Number:Temperature Z5_Temperature "Temperature [%.2f °F]" <temperature> (Z5_Values) ["Sensor", "Temperature", "Required"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Z5_Temperature"} 
-Number:Dimensionless Z5_Humidity "Humidity [%.2f %%]" <humidity> (Z5_Values) ["Sensor", "Humidity", "Required"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Z5_Humidity"} 
-Number:Temperature Z5_DewPoint "Dew Point [%.2f °F]" <temperature> (Z5_Values) ["Sensor", "Required"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Z5_DewPoint"} 
 
 /* 
 // EnviroPlus
