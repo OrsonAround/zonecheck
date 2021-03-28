@@ -28,14 +28,12 @@ Number:Temperature Z1_TargetTemp "Target Temperature [%.2f °F]" <temperature> (
 Number:Dimensionless Z1_TargetHumid "Target Humiditiy [%.2f %%]" <humidity> (Z1_Settings) ["Settings"]
 Number:Temperature Z1_MaxTemp "Maximum Temperature [%.2f °F]" <temperature_hot> (Z1_Settings) ["Settings"]
 Number:Temperature Z1_MinTemp "Minimum Temperature [%.2f °F]" <temperature_cold> (Z1_Settings) ["Settings"]
-Number Z1_CycleTime "Cycle Time [%d %unit%]" <time> (Z1_Settings) ["Settings"]
 Switch Z1_MistEnabled "Mist Enabled [%s]" <switch> (Z1_Settings) ["Settings"]
 Number Z1_MistCycleTime "Mist Cycle Time [%s]" <switch> (Z1_Settings) ["Settings"]
 Number Z1_MistTime "Mist Time [%d %unit%]" <time> (Z1_Settings) ["Settings"]
 Switch Z1_FanEnabled "Fan Enabled [%s]" <switch> (Z1_Settings) ["Settings"]
 Number Z1_FanCycleTime "Fan Cycle Time [%s]" <switch> (Z1_Settings) ["Settings"]
 Number Z1_FanTime "Fan Time [%d %unit%]" <time> (Z1_Settings) ["Settings"]
-Number Z1_FanDelayTime "Fan Delay Time [%d %unit%]" <time> (Z1_Settings) ["Settings"]
 
 Switch Z1_Relay "Relay 1 [%s]" <switch> (Z1) ["Relay", "Devices"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Relay1", autoupdate="false"} 
 Switch Z1_FanSwitch "Fan Switch [%s]" <switch> (Z1) ["Fan", "Devices"] {channel="zigbee:device:81b451f743:60a423fffe98d486:60A423FFFE98D486_1_switch"} 
@@ -53,14 +51,12 @@ Number:Temperature Z2_TargetTemp "Target Temperature [%.2f °F]" <temperature> (
 Number:Dimensionless Z2_TargetHumid "Target Humiditiy [%.2f %%]" <humidity> (Z2_Settings) ["Settings"]
 Number:Temperature Z2_MaxTemp "Maximum Temperature [%.2f °F]" <temperature_hot> (Z2_Settings) ["Settings"]
 Number:Temperature Z2_MinTemp "Minimum Temperature [%.2f °F]" <temperature_cold> (Z2_Settings) ["Settings"]
-Number Z2_CycleTime "Cycle Time [%d %unit%]" <time> (Z2_Settings) ["Settings"]
 Switch Z2_MistEnabled "Mist Enabled [%s]" <switch> (Z2_Settings) ["Settings"]
 Number Z2_MistCycleTime "Mist Cycle Time [%s]" <switch> (Z2_Settings) ["Settings"]
 Number Z2_MistTime "Mist Time [%d %unit%]" <time> (Z2_Settings) ["Settings"]
 Switch Z2_FanEnabled "Fan Enabled [%s]" <switch> (Z2_Settings) ["Settings"]
 Number Z2_FanCycleTime "Fan Cycle Time [%s]" <switch> (Z2_Settings) ["Settings"]
 Number Z2_FanTime "Fan Time [%d %unit%]" <time> (Z2_Settings) ["Settings"]
-Number Z2_FanDelayTime "Fan Delay Time [%d %unit%]" <time> (Z2_Settings) ["Settings"]
 
 Switch Z2_Relay "Relay 2 [%s]" <switch> (Z2) ["Relay", "Devices"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Relay2"} 
 Switch Z2_FanSwitch "Fan Switch [%s]" <switch> (Z2) ["Fan", "Devices"] {channel="zigbee:device:81b451f743:60a423fffe98d399:60A423FFFE98D399_1_switch"} 
@@ -78,14 +74,12 @@ Number:Temperature Z3_TargetTemp "Target Temperature [%.2f °F]" <temperature> (
 Number:Dimensionless Z3_TargetHumid "Target Humiditiy [%.2f %%]" <humidity> (Z3_Settings) ["Settings"]
 Number:Temperature Z3_MaxTemp "Maximum Temperature [%.2f °F]" <temperature_hot> (Z3_Settings) ["Settings"]
 Number:Temperature Z3_MinTemp "Minimum Temperature [%.2f °F]" <temperature_cold> (Z3_Settings) ["Settings"]
-Number Z3_CycleTime "Cycle Time [%d %unit%]" <time> (Z3_Settings) ["Settings"]
 Switch Z3_MistEnabled "Mist Enabled [%s]" <switch> (Z3_Settings) ["Settings"]
 Number Z3_MistCycleTime "Mist Cycle Time [%s]" <switch> (Z3_Settings) ["Settings"]
 Number Z3_MistTime "Mist Time [%d %unit%]" <time> (Z3_Settings) ["Settings"]
 Switch Z3_FanEnabled "Fan Enabled [%s]" <switch> (Z3_Settings) ["Settings"]
 Number Z3_FanCycleTime "Fan Cycle Time [%s]" <switch> (Z3_Settings) ["Settings"]
 Number Z3_FanTime "Fan Time [%d %unit%]" <time> (Z3_Settings) ["Settings"]
-Number Z3_FanDelayTime "Fan Delay Time [%d %unit%]" <time> (Z3_Settings) ["Settings"]
 
 Switch Z3_Relay "Relay 9 [%s]" <switch> (Z3) ["Relay", "Devices"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Relay9"} 
 Switch Z3_FanSwitch "Fan Switch [%s]" <switch> (Z3) ["Fan", "Devices"] {channel="zigbee:device:81b451f743:60a423fffe98d318:60A423FFFE98D318_1_switch"} 
@@ -104,14 +98,12 @@ Number:Temperature Z4_TargetTemp "Target Temperature [%.2f °F]" <temperature> (
 Number:Dimensionless Z4_TargetHumid "Target Humiditiy [%.2f %%]" <humidity> (Z4_Settings) ["Settings"]
 Number:Temperature Z4_MaxTemp "Maximum Temperature [%.2f °F]" <temperature_hot> (Z4_Settings) ["Settings"]
 Number:Temperature Z4_MinTemp "Minimum Temperature [%.2f °F]" <temperature_cold> (Z4_Settings) ["Settings"]
-Number Z4_CycleTime "Cycle Time [%d %unit%]" <time> (Z4_Settings) ["Settings"]
 Switch Z4_MistEnabled "Mist Enabled [%s]" <switch> (Z4_Settings) ["Settings"]
 Number Z4_MistCycleTime "Mist Cycle Time [%s]" <switch> (Z4_Settings) ["Settings"]
 Number Z4_MistTime "Mist Time [%d %unit%]" <time> (Z4_Settings) ["Settings"]
 Switch Z4_FanEnabled "Fan Enabled [%s]" <switch> (Z4_Settings) ["Settings"]
 Number Z4_FanCycleTime "Fan Cycle Time [%s]" <switch> (Z4_Settings) ["Settings"]
 Number Z4_FanTime "Fan Time [%d %unit%]" <time> (Z4_Settings) ["Settings"]
-Number Z4_FanDelayTime "Fan Delay Time [%d %unit%]" <time> (Z4_Settings) ["Settings"]
 
 Switch Z4_Relay "Relay 10 [%s]" <switch> (Z4) ["Relay", "Devices"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Relay10"} 
 Switch Z4_FanSwitch "Fan Switch [%s]" <switch> (Z4) ["Fan", "Devices"] {channel="zigbee:device:81b451f743:086bd7fffe6e41c6:086BD7FFFE6E41C6_1_switch"}
@@ -120,7 +112,7 @@ Number:Temperature Z4_Temperature "Temperature [%.2f °F]" <temperature> (Z4_Val
 Number:Dimensionless Z4_Humidity "Humidity [%.2f %%]" <humidity> (Z4_Values) ["Sensor", "Humidity", "Required"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Z4_Humidity"} 
 Number:Temperature Z4_DewPoint "Dew Point [%.2f °F]" <temperature> (Z4_Values) ["Sensor", "Required"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Z4_DewPoint"} 
 
-/* 
+/* Too filter from logs for now
 // EnviroPlus
 Group EnviroPlus "EnviroPlus"
 Number:Temperature EnviroPlus_Temperature "Temperature [%.2f °F]" <temperature> (EnviroPlus) {channel="mqtt:topic:MQTTBroker:EnviroPlus:EnviroPlus_Temperature"} 
