@@ -30,9 +30,9 @@ Bridge mqtt:broker:MQTTBroker [ host="127.0.0.1", secure=false, qos=2] {
       Type number : Z4_Humidity "Humidity" [stateTopic="sht10/zone/D/humidity/state"]
       Type number : Z4_DewPoint "Dew Point" [stateTopic="sht10/zone/D/dewpoint/state"]
       Type switch : Z4_Enabled "Zone D" [stateTopic="sht10/zone/D/enabled/state"]
-      Type number : Z5_Temperature "Temperature"  [stateTopic="sht10/zone/D/temperature/state"]
-      Type number : Z5_Humidity "Humidity" [stateTopic="sht10/zone/D/humidity/state"]
-      Type number : Z5_DewPoint "Dew Point" [stateTopic="sht10/zone/D/dewpoint/state"]
+      Type number : ZA_Temperature "Temperature"  [stateTopic="sht10/zone/E/temperature/state"]
+      Type number : ZA_Humidity "Humidity" [stateTopic="sht10/zone/E/humidity/state"]
+      Type number : ZA_DewPoint "Dew Point" [stateTopic="sht10/zone/E/dewpoint/state"]
   }
   
   Thing topic EnviroPlus "EnviroPlus" @ "Mushroom" [availabilityTopic="enviroplus/status"] {

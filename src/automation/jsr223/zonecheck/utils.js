@@ -34,7 +34,7 @@ scriptExtension.importPreset('default'); // ?
   context.zoneBanner = '* * * * *     Zone {}     * * * * *';
   
   context.runCycle = function runCycle() {
-    //context.setDefaultItemValues(true, true);
+    //context.setDefaultItemValues(false, true);
     context.counters = context.counters || {};
     context.timers = context.timers || {};
     //logger.info('State Description',context.get_metadata(zoneName, 'stateDescription'));

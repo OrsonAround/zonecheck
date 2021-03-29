@@ -1,0 +1,11 @@
+Strategies {
+    everyMinute : "0 * * * * ?"
+    everyHour   : "0 0 * * * ?"
+    everyDay    : "0 0 0 * * ?"
+    default = everyChange
+}
+
+Items {
+    * : strategy = everyChange
+    ZA_Settings*, Z1_Settings*, Z2_Settings*, Z3_Settings*, Z4_Settings*, Z5_Settings* : strategy = everyChange, restoreOnStartup
+}

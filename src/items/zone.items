@@ -15,9 +15,9 @@ Number:Temperature ZA_MinTemp "Minimum Temperature [%.2f °F]" <temperature_cold
 Switch ZA_SpaceHeater "Space Heater" <switch> (Z1, Z2, Z3, Z4, Z5, ZA) ["Devices", "Heating"] {channel="zigbee:device:81b451f743:086bd7fffe470def:086BD7FFFE470DEF_1_switch", autoupdate="false"}
 Switch ZA_WaterPump "Water Pump" <switch> (Z1, Z2, Z3, Z4, Z5, ZA) ["Devices", "Pump"] {channel="zigbee:device:81b451f743:60a423fffe98d376:60A423FFFE98D376_1_switch", autoupdate="false"}
 
-Number:Temperature ZA_Temperature "Temperature [%.2f °F]" <temperature> (ZA_Values) ["Sensor", "Temperature", "Required"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Z5_Temperature"} 
-Number:Dimensionless ZA_Humidity "Humidity [%.2f %%]" <humidity> (ZA_Values) ["Sensor", "Humidity", "Required"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Z5_Humidity"} 
-Number:Temperature ZA_DewPoint "Dew Point [%.2f °F]" <temperature> (ZA_Values) ["Sensor", "Required"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Z5_DewPoint"} 
+Number:Temperature ZA_Temperature "Temperature [%.2f °F]" <temperature> (ZA_Values) ["Sensor", "Temperature", "Required"] {channel="mqtt:topic:MQTTBroker:Climate_Control:ZA_Temperature"} 
+Number:Dimensionless ZA_Humidity "Humidity [%.2f %%]" <humidity> (ZA_Values) ["Sensor", "Humidity", "Required"] {channel="mqtt:topic:MQTTBroker:Climate_Control:ZA_Humidity"} 
+Number:Temperature ZA_DewPoint "Dew Point [%.2f °F]" <temperature> (ZA_Values) ["Sensor", "Required"] {channel="mqtt:topic:MQTTBroker:Climate_Control:ZA_DewPoint"} 
 
 // Zone 1
 Group:Switch:OR(ON,OFF) Z1 "Zone 1" (Zones) ["Zone"] {stateDescription="" [pattern="%s", options="Enabled, Disabled, Errored"]} // Zones can be named anything, but require a "Zone" tag.
@@ -84,9 +84,8 @@ Number Z3_FanTime "Fan Time [%d %unit%]" <time> (Z3_Settings) ["Settings"]
 Switch Z3_Relay "Relay 9 [%s]" <switch> (Z3) ["Relay", "Devices"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Relay9"} 
 Switch Z3_FanSwitch "Fan Switch [%s]" <switch> (Z3) ["Fan", "Devices"] {channel="zigbee:device:81b451f743:60a423fffe98d318:60A423FFFE98D318_1_switch"} 
 
-// THIS IS OFFSET ===>
-Number:Temperature Z3_Temperature "Temperature [%.2f °F]" <temperature> (Z3_Values) ["Sensor", "Offset"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Z3_Temperature" [profile="system:offset", offset="1.79"]}
-Number:Dimensionless Z3_Humidity "Humidity [%.2f %%]" <humidity> (Z3_Values) ["Sensor"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Z3_Humidity" [profile="system:offset", offset="-3.84"]}
+Number:Temperature Z3_Temperature "Temperature [%.2f °F]" <temperature> (Z3_Values) ["Sensor", "Offset"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Z3_Temperature"}
+Number:Dimensionless Z3_Humidity "Humidity [%.2f %%]" <humidity> (Z3_Values) ["Sensor"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Z3_Humidity"}
 Number:Temperature Z3_DewPoint "Dew Point [%.2f °F]" <temperature> (Z3_Values) ["Sensor", "Required"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Z3_DewPoint"} 
 
 // Zone 4

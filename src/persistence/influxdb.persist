@@ -5,6 +5,5 @@ Strategies {
 }
 
 Items {
-    ClimateControlGroup*                : strategy = everyChange, everyHour
-    Presence_Phone                      : strategy = everyChange
+    *                                   : strategy = everyChange
 }

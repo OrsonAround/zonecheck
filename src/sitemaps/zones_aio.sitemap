@@ -5,20 +5,20 @@ sitemap zones_aio label="Zone Check AIO" {
     }
     
     Frame label="Zone 1" {
-        Text item=Z2_Temperature
-        Text item=Z2_Humidity
-        Text item=Z2_DewPoint
-        Text item=Z2_Relay
-        Text item=Z2_FanSwitch
-        Setpoint item=Z2_TargetTemp 
-        Setpoint item=Z2_TargetHumid 
-        Switch item=Z2_Enabled
-        Switch item=Z2_MistEnabled
-        Setpoint item=Z2_MistCycleTime
-        Setpoint item=Z2_MistTime 
-        Switch item=Z2_FanEnabled 
-        Setpoint item=Z2_FanTime 
-        Setpoint item=Z2_FanCycleTime         
+        Text item=Z1_Temperature
+        Text item=Z1_Humidity
+        Text item=Z1_DewPoint
+        Text item=Z1_Relay
+        Text item=Z1_FanSwitch
+        Setpoint item=Z1_TargetTemp 
+        Setpoint item=Z1_TargetHumid 
+        Switch item=Z1_Enabled
+        Switch item=Z1_MistEnabled
+        Setpoint item=Z1_MistCycleTime
+        Setpoint item=Z1_MistTime 
+        Switch item=Z1_FanEnabled 
+        Setpoint item=Z1_FanTime 
+        Setpoint item=Z1_FanCycleTime         
     }
 
     Frame label="Zone 2" {
