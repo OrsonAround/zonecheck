@@ -5,70 +5,73 @@ sitemap zones_aio label="Zone Check AIO" {
     }
     
     Frame label="Zone 1" {
+        Switch item=Z1_Enabled
+        Text icon=""
         Text item=Z1_Temperature
         Text item=Z1_Humidity
-        Text item=Z1_DewPoint
-        Text item=Z1_Relay
-        Text item=Z1_FanSwitch
         Setpoint item=Z1_TargetTemp 
-        Setpoint item=Z1_TargetHumid 
-        Switch item=Z1_Enabled
+        Setpoint item=Z1_TargetHumid   
         Switch item=Z1_MistEnabled
-        Setpoint item=Z1_MistCycleTime
-        Setpoint item=Z1_MistTime 
-        Switch item=Z1_FanEnabled 
-        Setpoint item=Z1_FanTime 
-        Setpoint item=Z1_FanCycleTime         
+        Text item=Z1_Relay
+        Slider item=Z1_MistCycleTime minValue=0 maxValue=86400 step=3600
+        Setpoint item=Z1_MistTime minValue=0 maxValue=60 step=1
+        Switch item=Z1_FanEnabled
+        Text item=Z1_FanSwitch 
+        Slider item=Z1_FanCycleTime minValue=0 maxValue=86400 step=3600 
+        Setpoint item=Z1_FanTime minValue=0 maxValue=600 step=60     
     }
 
     Frame label="Zone 2" {
+        Switch item=Z2_Enabled
+        Text icon=""
         Text item=Z2_Temperature
         Text item=Z2_Humidity
-        Text item=Z2_DewPoint
-        Text item=Z2_Relay
-        Text item=Z2_FanSwitch
         Setpoint item=Z2_TargetTemp 
-        Setpoint item=Z2_TargetHumid 
-        Switch item=Z2_Enabled
+        Setpoint item=Z2_TargetHumid   
         Switch item=Z2_MistEnabled
-        Setpoint item=Z2_MistCycleTime
-        Setpoint item=Z2_MistTime 
-        Switch item=Z2_FanEnabled 
-        Setpoint item=Z2_FanTime 
-        Setpoint item=Z2_FanCycleTime         
+        Text item=Z2_Relay
+        Slider item=Z2_MistCycleTime minValue=0 maxValue=86400 step=3600
+        Setpoint item=Z2_MistTime minValue=0 maxValue=60 step=1
+        Switch item=Z2_FanEnabled
+        Text item=Z2_FanSwitch 
+        Slider item=Z2_FanCycleTime minValue=0 maxValue=86400 step=3600 
+        Setpoint item=Z2_FanTime minValue=0 maxValue=600 step=60     
     }
 
     Frame label="Zone 3" {
+        Switch item=Z3_Enabled
+        Text icon=""
         Text item=Z3_Temperature
         Text item=Z3_Humidity
-        Text item=Z3_DewPoint
-        Text item=Z3_Relay
-        Text item=Z3_FanSwitch
         Setpoint item=Z3_TargetTemp 
-        Setpoint item=Z3_TargetHumid 
-        Switch item=Z3_Enabled
+        Setpoint item=Z3_TargetHumid   
         Switch item=Z3_MistEnabled
-        Setpoint item=Z3_MistCycleTime
-        Setpoint item=Z3_MistTime 
-        Switch item=Z3_FanEnabled 
-        Setpoint item=Z3_FanTime 
-        Setpoint item=Z3_FanCycleTime         
+        Text item=Z3_Relay
+        Slider item=Z3_MistCycleTime minValue=0 maxValue=86400 step=3600
+        Setpoint item=Z3_MistTime minValue=0 maxValue=60 step=1
+        Switch item=Z3_FanEnabled
+        Text item=Z3_FanSwitch 
+        Slider item=Z3_FanCycleTime minValue=0 maxValue=86400 step=3600 
+        Setpoint item=Z3_FanTime minValue=0 maxValue=600 step=60     
     }
 
     Frame label="Zone 4" {
+        Switch item=Z4_Enabled
+        Text icon=""
         Text item=Z4_Temperature
         Text item=Z4_Humidity
-        Text item=Z4_DewPoint
-        Text item=Z4_Relay
-        Text item=Z4_FanSwitch
         Setpoint item=Z4_TargetTemp 
-        Setpoint item=Z4_TargetHumid 
-        Switch item=Z4_Enabled
+        Setpoint item=Z4_TargetHumid   
         Switch item=Z4_MistEnabled
-        Setpoint item=Z4_MistCycleTime
-        Setpoint item=Z4_MistTime 
-        Switch item=Z4_FanEnabled 
-        Setpoint item=Z4_FanTime 
-        Setpoint item=Z4_FanCycleTime         
+        Text item=Z4_Relay
+        Slider item=Z4_MistCycleTime minValue=0 maxValue=86400 step=3600
+        Setpoint item=Z4_MistTime minValue=0 maxValue=60 step=1
+        Switch item=Z4_FanEnabled
+        Text item=Z4_FanSwitch 
+        Slider item=Z4_FanCycleTime minValue=0 maxValue=86400 step=3600 
+        Setpoint item=Z4_FanTime minValue=0 maxValue=600 step=60     
     }
+
+
+    
 }
