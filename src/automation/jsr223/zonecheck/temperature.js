@@ -1,34 +1,28 @@
 (function (context) {
   'use strict';
 
-
-
   context.checkTemp = function checkTemp(zone) {
     var zoneName = zone.getName();
     var currentTemp = ir.getItem(zoneName + '_Temperature').getState();
     var targetTemp = ir.getItem(zoneName + '_TargetTemp').getState();
-    var bufferedTemp = parseInt(targetTemp) + +0.5;
+    var bufferedTemp = parseInt(targetTemp) + +1.5;
+    var spaceHeaterState = ir.getItem('ZA_SpaceHeater').getState();
 
     if (currentTemp !== UNDEF && currentTemp !== null) {
       logger.info('Temperature: {} ({})', currentTemp, targetTemp);
-      if (currentTemp > bufferedTemp) {
+      if (currentTemp > bufferedTemp && spaceHeaterState === OnOffType.ON | spaceHeaterState === UNDEF) {
         logger.info('Temperature too high.');
-        events.sendCommand('ZA_SpaceHeater', OnOffType.OFF);
- 
-      } else if (currentTemp < bufferedTemp) {
+        events.sendCommand('ZA_SpaceHeater', OnOffType.OFF); 
+      } else if (currentTemp < targetTemp && spaceHeaterState === OnOffType.OFF | spaceHeaterState === UNDEF) {
         logger.info('Temperature too low.');
-        events.sendCommand('ZA_SpaceHeater', OnOffType.ON);
-
-        
-      } else {
+        events.sendCommand('ZA_SpaceHeater', OnOffType.ON);        
+      } else if (spaceHeaterState === OnOffType.ON | spaceHeaterState === UNDEF) {
         logger.info('Temperature in range.');
-        //stopZoneTemp(zone);
         events.sendCommand('ZA_SpaceHeater', OnOffType.OFF);
       }
     } else {
       logger.warn('Zone {} does not have a valid temperature.', zoneName);
     }
-
     context.getZoneItems(zone).forEach(function each(item) {
       if (
         item.getTags().contains('Heating') ||
@@ -39,8 +33,7 @@
     });
   };
 
-  // TODO IMPORTANT Potential flapping if two or more zones are on opposite sides of buffertemp?? YES
-  // Perhaps add a 'heatCycle' timer to prevent
+  // TODO IMPORTANT flapping if two or more zones are on opposite sides of buffertemp
   context.checkTemp2 = function checkTemp(zone) {
     var zoneName = zone.getName();
     var currentTemp = ir.getItem(zoneName + '_Temperature').getState();

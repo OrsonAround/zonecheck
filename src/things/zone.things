@@ -3,8 +3,20 @@ Bridge mqtt:broker:MQTTBroker [ host="127.0.0.1", secure=false, qos=2] {
     Channels:
       Type switch : Relay1 "Relay 1" [stateTopic="climate/relay/1/state" , commandTopic="climate/relay/1/set", on="ON", off="OFF"]
       Type switch : Relay2 "Relay 2" [stateTopic="climate/relay/2/state" , commandTopic="climate/relay/2/set", on="ON", off="OFF"]
+      Type switch : Relay3 "Relay 3" [stateTopic="climate/relay/3/state" , commandTopic="climate/relay/3/set", on="ON", off="OFF"]
+      Type switch : Relay4 "Relay 4" [stateTopic="climate/relay/4/state" , commandTopic="climate/relay/4/set", on="ON", off="OFF"]
+      Type switch : Relay5 "Relay 5" [stateTopic="climate/relay/5/state" , commandTopic="climate/relay/5/set", on="ON", off="OFF"]
+      Type switch : Relay6 "Relay 6" [stateTopic="climate/relay/6/state" , commandTopic="climate/relay/6/set", on="ON", off="OFF"]
+      Type switch : Relay7 "Relay 7" [stateTopic="climate/relay/7/state" , commandTopic="climate/relay/7/set", on="ON", off="OFF"]
+      Type switch : Relay8 "Relay 8" [stateTopic="climate/relay/8/state" , commandTopic="climate/relay/8/set", on="ON", off="OFF"]
       Type switch : Relay9 "Relay 9" [stateTopic="climate/relay/9/state" , commandTopic="climate/relay/9/set", on="ON", off="OFF"]
       Type switch : Relay10 "Relay 10" [stateTopic="climate/relay/10/state" , commandTopic="climate/relay/10/set", on="ON", off="OFF"]
+      Type switch : Relay11 "Relay 11" [stateTopic="climate/relay/11/state" , commandTopic="climate/relay/11/set", on="ON", off="OFF"]
+      Type switch : Relay12 "Relay 12" [stateTopic="climate/relay/12/state" , commandTopic="climate/relay/12/set", on="ON", off="OFF"]
+      Type switch : Relay13 "Relay 13" [stateTopic="climate/relay/13/state" , commandTopic="climate/relay/13/set", on="ON", off="OFF"]
+      Type switch : Relay14 "Relay 14" [stateTopic="climate/relay/14/state" , commandTopic="climate/relay/14/set", on="ON", off="OFF"]
+      Type switch : Relay15 "Relay 15" [stateTopic="climate/relay/15/state" , commandTopic="climate/relay/15/set", on="ON", off="OFF"]
+      Type switch : Relay16 "Relay 16" [stateTopic="climate/relay/16/state" , commandTopic="climate/relay/16/set", on="ON", off="OFF"]
       Type switch : ZA_Enabled "All Zones" [stateTopic="sht10/zone/E/enabled/state"]
       Type switch : Z1_Enabled "Zone 1" [stateTopic="sht10/zone/A/enabled/state"]
       Type number : Z1_Temperature "Temperature" [stateTopic="sht10/zone/A/temperature/state"]
@@ -52,3 +64,4 @@ Bridge mqtt:broker:MQTTBroker [ host="127.0.0.1", secure=false, qos=2] {
       Type number : EnviroPlus_LUX "LUX" [stateTopic="home/enviroplus/state", transformationPattern="JSONPATH:$.lux"]
   }
 }
+

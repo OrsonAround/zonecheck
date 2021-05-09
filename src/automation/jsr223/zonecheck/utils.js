@@ -30,9 +30,7 @@ scriptExtension.importPreset('default'); // ?
 
   context.PersistenceExtensions = PersistenceExtensions;
   context.pe = PersistenceExtensions;
-
-  context.zoneBanner = '* * * * *     Zone {}     * * * * *';
-  
+  context.zoneBanner = '* * * * *     Zone {}     * * * * *';  
   context.runCycle = function runCycle() {
     //context.setDefaultItemValues(false, true);
     context.counters = context.counters || {};
@@ -41,20 +39,20 @@ scriptExtension.importPreset('default'); // ?
     var zones = context.getZones(true);
     logger.info('* * * * *   Zone Check    * * * * *            ');
     logger.info('Found {} enabled zone(s).', zones.length);
+    context.checkTemp(ir.getItem('ZA')); // Only check ZA until flapping is fixed on tag-based check
     zones.forEach(function each(zone) {
       var zoneName = zone.getName();
       logger.info(zoneBanner, zoneName);
       context.timers[zoneName] = context.timers[zoneName] || {};
       context.counters[zoneName] = context.counters[zoneName] || {};
-      context.checkTemp(ir.getItem('ZA')); // Only check ZA until flapping is fixed on tag-based check
-      if (zone.getName() === 'Z1') {
-        context.checkHumidityNoCycle(zone);
-      } else if (zone.getName() !== 'ZA') {
-        context.checkHumidity(zone);
-        context.checkFans(zone); // Don't check fans with NoCycle yet
-      }      
       
-      context.displayTimers(zone);
+      if (zone.getName() !== 'ZA') {
+        if (context.canHumidify(zone)) {
+          context.checkHumidity(zone);
+        }
+        context.checkFans(zone); 
+        context.displayTimers(zone);
+      }                  
     });
   };
 
@@ -127,6 +125,16 @@ scriptExtension.importPreset('default'); // ?
       logger.error(e);
     }
   };
+
+  context.onZoneEnabled = function onZoneEnabled(zone) {
+
+  }
+
+  //TODO Update time remaing on a cycle with new value offset by old value
+  // otherwise have to wait for timer to expire and be recreated before it gets new value.
+  context.onTimeUpdated = function onTimeUpdated(timer) {
+
+  }
 
   context.allRelaysAreOff = function allRelaysAreOff() {
     var relays = ir.getItemsByTagAndType('Switch', 'Relay');

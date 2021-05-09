@@ -1,7 +1,13 @@
 sitemap zones_aio label="Zone Check AIO" {
         Frame label="All Zones" {
+        Switch item=ZA_Enabled
+        Text icon=""
         Text item=ZA_WaterPump
         Text item=ZA_SpaceHeater       
+        Text item=ZA_Temperature
+        Text item=ZA_Humidity
+        Setpoint item=ZA_TargetTemp 
+        Setpoint item=ZA_TargetHumid  
     }
     
     Frame label="Zone 1" {
@@ -13,11 +19,11 @@ sitemap zones_aio label="Zone Check AIO" {
         Setpoint item=Z1_TargetHumid   
         Switch item=Z1_MistEnabled
         Text item=Z1_Relay
-        Slider item=Z1_MistCycleTime minValue=0 maxValue=86400 step=3600
+        Slider item=Z1_MistCycleTime minValue=0 maxValue=43200 step=900
         Setpoint item=Z1_MistTime minValue=0 maxValue=60 step=1
         Switch item=Z1_FanEnabled
         Text item=Z1_FanSwitch 
-        Slider item=Z1_FanCycleTime minValue=0 maxValue=86400 step=3600 
+        Slider item=Z1_FanCycleTime minValue=0 maxValue=43200 step=900 
         Setpoint item=Z1_FanTime minValue=0 maxValue=600 step=60     
     }
 
@@ -30,11 +36,11 @@ sitemap zones_aio label="Zone Check AIO" {
         Setpoint item=Z2_TargetHumid   
         Switch item=Z2_MistEnabled
         Text item=Z2_Relay
-        Slider item=Z2_MistCycleTime minValue=0 maxValue=86400 step=3600
+        Slider item=Z2_MistCycleTime minValue=0 maxValue=43200 step=900
         Setpoint item=Z2_MistTime minValue=0 maxValue=60 step=1
         Switch item=Z2_FanEnabled
         Text item=Z2_FanSwitch 
-        Slider item=Z2_FanCycleTime minValue=0 maxValue=86400 step=3600 
+        Slider item=Z2_FanCycleTime minValue=0 maxValue=43200 step=900 
         Setpoint item=Z2_FanTime minValue=0 maxValue=600 step=60     
     }
 
@@ -47,11 +53,11 @@ sitemap zones_aio label="Zone Check AIO" {
         Setpoint item=Z3_TargetHumid   
         Switch item=Z3_MistEnabled
         Text item=Z3_Relay
-        Slider item=Z3_MistCycleTime minValue=0 maxValue=86400 step=3600
+        Slider item=Z3_MistCycleTime minValue=0 maxValue=43200 step=900
         Setpoint item=Z3_MistTime minValue=0 maxValue=60 step=1
         Switch item=Z3_FanEnabled
         Text item=Z3_FanSwitch 
-        Slider item=Z3_FanCycleTime minValue=0 maxValue=86400 step=3600 
+        Slider item=Z3_FanCycleTime minValue=0 maxValue=43200 step=900 
         Setpoint item=Z3_FanTime minValue=0 maxValue=600 step=60     
     }
 
@@ -64,11 +70,11 @@ sitemap zones_aio label="Zone Check AIO" {
         Setpoint item=Z4_TargetHumid   
         Switch item=Z4_MistEnabled
         Text item=Z4_Relay
-        Slider item=Z4_MistCycleTime minValue=0 maxValue=86400 step=3600
+        Slider item=Z4_MistCycleTime minValue=0 maxValue=43200 step=900
         Setpoint item=Z4_MistTime minValue=0 maxValue=60 step=1
         Switch item=Z4_FanEnabled
         Text item=Z4_FanSwitch 
-        Slider item=Z4_FanCycleTime minValue=0 maxValue=86400 step=3600 
+        Slider item=Z4_FanCycleTime minValue=0 maxValue=43200 step=900 
         Setpoint item=Z4_FanTime minValue=0 maxValue=600 step=60     
     }
 

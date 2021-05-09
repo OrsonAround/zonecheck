@@ -13,7 +13,6 @@ Number:Temperature ZA_MaxTemp "Maximum Temperature [%.2f °F]" <temperature_hot>
 Number:Temperature ZA_MinTemp "Minimum Temperature [%.2f °F]" <temperature_cold> (ZA_Settings) ["Settings"]
 
 Switch ZA_SpaceHeater "Space Heater" <switch> (Z1, Z2, Z3, Z4, Z5, ZA) ["Devices", "Heating"] {channel="zigbee:device:81b451f743:086bd7fffe470def:086BD7FFFE470DEF_1_switch", autoupdate="false"}
-Switch ZA_WaterPump "Water Pump" <switch> (Z1, Z2, Z3, Z4, Z5, ZA) ["Devices", "Pump"] {channel="zigbee:device:81b451f743:60a423fffe98d376:60A423FFFE98D376_1_switch", autoupdate="false"}
 
 Number:Temperature ZA_Temperature "Temperature [%.2f °F]" <temperature> (ZA_Values) ["Sensor", "Temperature", "Required"] {channel="mqtt:topic:MQTTBroker:Climate_Control:ZA_Temperature"} 
 Number:Dimensionless ZA_Humidity "Humidity [%.2f %%]" <humidity> (ZA_Values) ["Sensor", "Humidity", "Required"] {channel="mqtt:topic:MQTTBroker:Climate_Control:ZA_Humidity"} 
@@ -28,15 +27,16 @@ Number:Temperature Z1_TargetTemp "Target Temperature [%.2f °F]" <temperature> (
 Number:Dimensionless Z1_TargetHumid "Target Humiditiy [%.2f %%]" <humidity> (Z1_Settings) ["Settings"]
 Number:Temperature Z1_MaxTemp "Maximum Temperature [%.2f °F]" <temperature_hot> (Z1_Settings) ["Settings"]
 Number:Temperature Z1_MinTemp "Minimum Temperature [%.2f °F]" <temperature_cold> (Z1_Settings) ["Settings"]
-Switch Z1_MistEnabled "Mist Enabled [%s]" <switch> (Z1_Settings) ["Settings"]
-Number Z1_MistCycleTime "Mist Cycle Time [JS(sToDhms.js):%s]" <time> (Z1_Settings) ["Settings"]
-Number Z1_MistTime "Mist Time [JS(sToDhms.js):%s]" <time> (Z1_Settings) ["Settings"]
+Switch Z1_HumidifierEnabled "Humidifier Enabled [%s]" <switch> (Z1_Settings) ["Settings"]
 Switch Z1_FanEnabled "Fan Enabled [%s]" <switch> (Z1_Settings) ["Settings"]
 Number Z1_FanCycleTime "Fan Cycle Time [JS(sToDhms.js):%s]" <time> (Z1_Settings) ["Settings"]
 Number Z1_FanTime "Fan Time [JS(sToDhms.js):%s]" <time> (Z1_Settings) ["Settings"]
 
-Switch Z1_Relay "Relay 1 [%s]" <switch> (Z1) ["Relay", "Devices"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Relay1", autoupdate="false"} 
 Switch Z1_FanSwitch "Fan Switch [%s]" <switch> (Z1) ["Fan", "Devices"] {channel="zigbee:device:81b451f743:60a423fffe98d486:60A423FFFE98D486_1_switch"} 
+Switch Z1_HumidifierFan "Humidifier Fan Relay 5 [%s]" <switch> (Z1) ["Relay", "Humidification", "Devices"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Relay5", autoupdate="false"}
+Switch Z1_HumidifierAtomizer "Humidifier Atomizer Relay 1 [%s]" <switch> (Z1) ["Relay", "Humidification", "Devices"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Relay1", autoupdate="false"}
+Switch Z1_ExhaustFan "Exhaust Fan Relay 9 [%s]" <switch> (Z1) ["Relay", "Exhaust", "Devices"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Relay9", autoupdate="false"}
+Switch Z1_Lights "Lighting Relay 13 [%s]" <switch> (Z1) ["Relay", "Lighting", "Devices"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Relay13", autoupdate="false"}
 
 Number:Temperature Z1_Temperature "Temperature [%.2f °F]" <temperature> (Z1_Values) ["Sensor", "Temperature", "Required"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Z1_Temperature"} 
 Number:Dimensionless Z1_Humidity "Humidity [%.2f %%]" <humidity> (Z1_Values) ["Sensor", "Humidity", "Required"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Z1_Humidity"} 
@@ -51,15 +51,17 @@ Number:Temperature Z2_TargetTemp "Target Temperature [%.2f °F]" <temperature> (
 Number:Dimensionless Z2_TargetHumid "Target Humiditiy [%.2f %%]" <humidity> (Z2_Settings) ["Settings"]
 Number:Temperature Z2_MaxTemp "Maximum Temperature [%.2f °F]" <temperature_hot> (Z2_Settings) ["Settings"]
 Number:Temperature Z2_MinTemp "Minimum Temperature [%.2f °F]" <temperature_cold> (Z2_Settings) ["Settings"]
-Switch Z2_MistEnabled "Mist Enabled [%s]" <switch> (Z2_Settings) ["Settings"]
-Number Z2_MistCycleTime "Mist Cycle Time [JS(sToDhms.js):%s]" <time> (Z2_Settings) ["Settings"]
-Number Z2_MistTime "Mist Time [JS(sToDhms.js):%s]" <time> (Z2_Settings) ["Settings"]
+Switch Z2_HumidifierEnabled "Humidifier Enabled [%s]" <switch> (Z2_Settings) ["Settings"]
+
 Switch Z2_FanEnabled "Fan Enabled [%s]" <time> (Z2_Settings) ["Settings"]
 Number Z2_FanCycleTime "Fan Cycle Time [JS(sToDhms.js):%s]" <time> (Z2_Settings) ["Settings"]
 Number Z2_FanTime "Fan Time [JS(sToDhms.js):%s]" <time> (Z2_Settings) ["Settings"]
 
-Switch Z2_Relay "Relay 2 [%s]" <switch> (Z2) ["Relay", "Devices"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Relay2"} 
 Switch Z2_FanSwitch "Fan Switch [%s]" <switch> (Z2) ["Fan", "Devices"] {channel="zigbee:device:81b451f743:60a423fffe98d399:60A423FFFE98D399_1_switch"} 
+Switch Z2_HumidifierFan "Humidifier Fan Relay 6 [%s]" <switch> (Z2) ["Relay", "Humidification", "Devices"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Relay6", autoupdate="false"}
+Switch Z2_HumidifierAtomizer "Humidifier Atomizer Relay 2 [%s]" <switch> (Z2) ["Relay", "Humidification", "Devices"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Relay2", autoupdate="false"}
+Switch Z2_ExhaustFan "Exhaust Fan Relay 10  [%s]" <switch> (Z2) ["Relay", "Exhaust", "Devices"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Relay10", autoupdate="false"}
+Switch Z2_Lights "Lighting Relay 14 [%s]" <switch> (Z2) ["Relay", "Lighting", "Devices"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Relay14", autoupdate="false"}
 
 Number:Temperature Z2_Temperature "Temperature [%.2f °F]" <temperature> (Z2_Values) ["Sensor", "Temperature", "Required"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Z2_Temperature"} 
 Number:Dimensionless Z2_Humidity "Humidity [%.2f %%]" <humidity> (Z2_Values) ["Sensor", "Humidity", "Required"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Z2_Humidity"} 
@@ -74,15 +76,17 @@ Number:Temperature Z3_TargetTemp "Target Temperature [%.2f °F]" <temperature> (
 Number:Dimensionless Z3_TargetHumid "Target Humiditiy [%.2f %%]" <humidity> (Z3_Settings) ["Settings"]
 Number:Temperature Z3_MaxTemp "Maximum Temperature [%.2f °F]" <temperature_hot> (Z3_Settings) ["Settings"]
 Number:Temperature Z3_MinTemp "Minimum Temperature [%.2f °F]" <temperature_cold> (Z3_Settings) ["Settings"]
-Switch Z3_MistEnabled "Mist Enabled [%s]" <switch> (Z3_Settings) ["Settings"]
-Number Z3_MistCycleTime "Mist Cycle Time [JS(sToDhms.js):%s]" <time> (Z3_Settings) ["Settings"]
-Number Z3_MistTime "Mist Time [JS(sToDhms.js):%s]" <time> (Z3_Settings) ["Settings"]
+Switch Z3_HumidifierEnabled "Mist Enabled [%s]" <switch> (Z3_Settings) ["Settings"]
+
 Switch Z3_FanEnabled "Fan Enabled [%s]" <switch> (Z3_Settings) ["Settings"]
 Number Z3_FanCycleTime "Fan Cycle Time [JS(sToDhms.js):%s]" <time> (Z3_Settings) ["Settings"]
 Number Z3_FanTime "Fan Time [JS(sToDhms.js):%s]" <time> (Z3_Settings) ["Settings"]
 
-Switch Z3_Relay "Relay 9 [%s]" <switch> (Z3) ["Relay", "Devices"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Relay9"} 
 Switch Z3_FanSwitch "Fan Switch [%s]" <switch> (Z3) ["Fan", "Devices"] {channel="zigbee:device:81b451f743:60a423fffe98d318:60A423FFFE98D318_1_switch"} 
+Switch Z3_HumidifierFan "Humidifier Fan Relay 7 [%s]" <switch> (Z3) ["Relay", "Humidification", "Devices"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Relay7", autoupdate="false"}
+Switch Z3_HumidifierAtomizer "Humidifier Atomizer Relay 3 [%s]" <switch> (Z3) ["Relay", "Humidification", "Devices"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Relay3", autoupdate="false"}
+Switch Z3_ExhaustFan "Exhaust Fan Relay 11 [%s]" <switch> (Z3) ["Relay", "Exhaust", "Devices"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Relay11", autoupdate="false"}
+Switch Z3_Lights "Lighting Relay 15 [%s]" <switch> (Z3) ["Relay", "Lighting", "Devices"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Relay15", autoupdate="false"}
 
 Number:Temperature Z3_Temperature "Temperature [%.2f °F]" <temperature> (Z3_Values) ["Sensor", "Offset"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Z3_Temperature"}
 Number:Dimensionless Z3_Humidity "Humidity [%.2f %%]" <humidity> (Z3_Values) ["Sensor"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Z3_Humidity"}
@@ -97,15 +101,18 @@ Number:Temperature Z4_TargetTemp "Target Temperature [%.2f °F]" <temperature> (
 Number:Dimensionless Z4_TargetHumid "Target Humiditiy [%.2f %%]" <humidity> (Z4_Settings) ["Settings"]
 Number:Temperature Z4_MaxTemp "Maximum Temperature [%.2f °F]" <temperature_hot> (Z4_Settings) ["Settings"]
 Number:Temperature Z4_MinTemp "Minimum Temperature [%.2f °F]" <temperature_cold> (Z4_Settings) ["Settings"]
-Switch Z4_MistEnabled "Mist Enabled [%s]" <switch> (Z4_Settings) ["Settings"]
-Number Z4_MistCycleTime "Mist Cycle Time [JS(sToDhms.js):%s]" <time> (Z4_Settings) ["Settings"]
-Number Z4_MistTime "Mist Time [JS(sToDhms.js):%s]" <time> (Z4_Settings) ["Settings"]
+Switch Z4_HumidifierEnabled "Mist Enabled [%s]" <switch> (Z4_Settings) ["Settings"]
+
 Switch Z4_FanEnabled "Fan Enabled [%s]" <time> (Z4_Settings) ["Settings"]
 Number Z4_FanCycleTime "Fan Cycle Time [JS(sToDhms.js):%s]" <switch> (Z4_Settings) ["Settings"]
 Number Z4_FanTime "Fan Time [JS(sToDhms.js):%s]" <time> (Z4_Settings) ["Settings"]
 
-Switch Z4_Relay "Relay 10 [%s]" <switch> (Z4) ["Relay", "Devices"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Relay10"} 
 Switch Z4_FanSwitch "Fan Switch [%s]" <switch> (Z4) ["Fan", "Devices"] {channel="zigbee:device:81b451f743:086bd7fffe6e41c6:086BD7FFFE6E41C6_1_switch"}
+Switch Z4_HumidifierFan "Humidifier Fan Relay 8 [%s]" <switch> (Z4) ["Relay", "Humidification", "Devices"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Relay8", autoupdate="false"}
+Switch Z4_HumidifierAtomizer "Humidifier Atomizer Relay 4 [%s]" <switch> (Z4) ["Relay", "Humidification", "Devices"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Relay4", autoupdate="false"}
+Switch Z4_ExhaustFan "Exhaust Fan Relay 12 [%s]" <switch> (Z4) ["Relay", "Exhaust", "Devices"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Relay12", autoupdate="false"}
+Dimmer Z4_Lights "Lighting Relay 16 [%s]" <switch> (Z4) ["Relay", "Lighting", "Devices"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Relay16", autoupdate="false"}
+
 
 Number:Temperature Z4_Temperature "Temperature [%.2f °F]" <temperature> (Z4_Values) ["Sensor", "Temperature", "Required"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Z4_Temperature"} 
 Number:Dimensionless Z4_Humidity "Humidity [%.2f %%]" <humidity> (Z4_Values) ["Sensor", "Humidity", "Required"] {channel="mqtt:topic:MQTTBroker:Climate_Control:Z4_Humidity"} 
